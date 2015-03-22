@@ -1,0 +1,38 @@
+body {
+  $bodyBackgroundColor: #030303;
+  $fontColor: #ace;
+
+  background-color: $bodyBackgroundColor;
+  color: $fontColor;
+  cursor: default;
+  font-family: sans-serif;
+  margin: 0;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  table {
+    display: inline-block;
+    border-radius: 2em;
+    box-shadow: 0em 0em 1em 0em $fontColor;
+    display: inline-block;
+    font-family: sans-serif;
+    padding: 1em;
+    margin: 4em;
+
+    td {
+      text-align: center;
+
+      &:hover {
+        text-shadow: 0 0 1em lighten($fontColor, 10%);
+      }
+    }
+  }
+
+  .center {
+    text-align: center;
+  }
+}

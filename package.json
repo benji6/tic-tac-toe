@@ -1,0 +1,34 @@
+{
+  "name": "tic-tac-toe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "js/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benji6/tic-tac-toe.git"
+  },
+  "author": "Ben Hall",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/benji6/tic-tac-toe/issues"
+  },
+  "homepage": "https://github.com/benji6/tic-tac-toe",
+  "jshintConfig": {
+    "esnext": "true"
+  },
+  "devDependencies": {
+    "browserify": "^9.0.3",
+    "gulp": "^3.8.11",
+    "gulp-minify-css": "^1.0.0",
+    "gulp-sass": "^1.3.3",
+    "gulp-util": "^3.0.4",
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "^2.5.0"
+  },
+  "dependencies": {
+    "jsml-parse": "^2.0.0"
+  }
+}
