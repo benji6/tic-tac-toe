@@ -1,6 +1,7 @@
 var BoardView = require('./BoardView.js');
 var MessageView = require('./MessageView.js');
-var Model = require('./Model.js');
+var BoardModel = require('./BoardModel.js');
+var PlayerModel = require('./PlayerModel.js');
 var equals = require('../utils/equals.js');
 
 var boardIsFull = function (boardModel) {
@@ -68,37 +69,37 @@ var isVictory = function (boardModel) {
   getDiagonalsFromBoardModel(boardModel).some(isThreeInARow);
 };
 
-var updateBoardModel = function (model, index) {
-  model.board[index] = model.player;
+var updateBoardModel = function (boardModel, index, player) {
+  boardModel.set(index, player);
 };
 
-var updatePlayerModel = function (model) {
-  model.player = model.player === 1 ? 2 : 1;
+var updatePlayerModel = function (playerModel) {
+  playerModel.set(playerModel.get() === 1 ? 2 : 1);
 };
 
 module.exports = function (parentDomEl) {
-  var model = Model();
-  var boardModel = model.board;
+  var boardModel = BoardModel();
+  var playerModel = PlayerModel();
   var renderBoardView = function () {};
   var renderMessageView = function () {};
 
   var userClick = function (index) {
-    if (!isValidMove(boardModel, index)) {
+    if (!isValidMove(boardModel.get(), index)) {
       return;
     }
-    updateBoardModel(model, index);
-    renderBoardView(boardModel);
-    if (isVictory(boardModel)) {
-      renderMessageView(`Victory for ${model.player === 1 ? "noughts" : "crosses"}!`);
+    updateBoardModel(boardModel, index, playerModel.get());
+    renderBoardView(boardModel.get());
+    if (isVictory(boardModel.get())) {
+      renderMessageView(`Victory for ${playerModel.get() === 1 ? "noughts" : "crosses"}!`);
       return;
     }
-    if (boardIsFull(boardModel)) {
+    if (boardIsFull(boardModel.get())) {
       renderMessageView(`Draw!`);
       return;
     }
-    updatePlayerModel(model);
+    updatePlayerModel(playerModel);
   };
 
-  renderBoardView = BoardView(boardModel, userClick, parentDomEl);
+  renderBoardView = BoardView(boardModel.get(), userClick, parentDomEl);
   renderMessageView = MessageView();
 };
