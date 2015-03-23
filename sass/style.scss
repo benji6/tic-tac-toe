@@ -24,9 +24,18 @@ body {
     margin: 4em;
 
     td {
+      $cellHeight: 3em;
+
+      box-shadow: 0em 0em 1em 0em $fontColor;
+      border-width: 1em;
+      cursor: pointer;
+      font-size: $cellHeight;
+      height: $cellHeight;
       text-align: center;
+      width: $cellHeight;
 
       &:hover {
+        background: darken($fontColor, 50%);
         text-shadow: 0 0 1em lighten($fontColor, 10%);
       }
     }
