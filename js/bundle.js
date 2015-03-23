@@ -160,12 +160,12 @@ var isVictory = function (boardModel) {
   getDiagonalsFromBoardModel(boardModel).some(isThreeInARow);
 };
 
-var updateBoardModel = function (boardModel, index, player) {
-  boardModel.set(index, player);
+var updateBoardModel = function (set, index, player) {
+  set(index, player);
 };
 
-var updatePlayerModel = function (playerModel) {
-  playerModel.set(playerModel.get() === 1 ? 2 : 1);
+var updatePlayerModel = function (set, currentPlayer) {
+  set(currentPlayer === 1 ? 2 : 1);
 };
 
 module.exports = function (parentDomEl) {
@@ -178,7 +178,7 @@ module.exports = function (parentDomEl) {
     if (!isValidMove(boardModel.get(), index)) {
       return;
     }
-    updateBoardModel(boardModel, index, playerModel.get());
+    updateBoardModel(boardModel.set, index, playerModel.get());
     renderBoardView(boardModel.get());
     if (isVictory(boardModel.get())) {
       renderMessageView(`Victory for ${playerModel.get() === 1 ? "noughts" : "crosses"}!`);
@@ -188,7 +188,7 @@ module.exports = function (parentDomEl) {
       renderMessageView(`Draw!`);
       return;
     }
-    updatePlayerModel(playerModel);
+    updatePlayerModel(playerModel.set, playerModel.get());
   };
 
   renderBoardView = BoardView(boardModel.get(), userClick, parentDomEl);
