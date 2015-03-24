@@ -180,10 +180,11 @@ module.exports = function (parentDomEl) {
     if (!isValidMove(boardModel.get(), index)) {
       return;
     }
-    updateBoardModel(boardModel.set, index, computePlayerTurn(boardModel.get()));
+    var currentPlayerTurn = computePlayerTurn(boardModel.get());
+    updateBoardModel(boardModel.set, index, currentPlayerTurn);
     renderBoardView(boardModel.get());
     if (isVictory(boardModel.get())) {
-      renderMessageView(`Victory for ${computePlayerTurn(boardModel.get()) === 1 ? "noughts" : "crosses"}!`);
+      renderMessageView(`Victory for ${currentPlayerTurn === 1 ? "noughts" : "crosses"}!`);
       return;
     }
     if (boardIsFull(boardModel.get())) {
