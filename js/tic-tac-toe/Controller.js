@@ -4,14 +4,12 @@ var BoardModel = require('./BoardModel.js');
 var R = require('ramda');
 
 var boardIsFull = function (boardModel) {
-  return !boardModel.filter(function (cell) {
-    return cell === 0;
-  }).length;
+  return !R.filter(R.eq(0), boardModel).length;
 };
 
 var computePlayerTurn = function (boardModel) {
-  var numberOfNoughts = boardModel.filter(R.eq(1)).length;
-  var numberOfCrosses = boardModel.filter(R.eq(2)).length;
+  var numberOfNoughts = R.filter(R.eq(1), boardModel).length;
+  var numberOfCrosses = R.filter(R.eq(2), boardModel).length;
 
   return numberOfNoughts === numberOfCrosses ? 1 : 2;
 };
