@@ -50,11 +50,11 @@ var getDiagonalsFromBoardModel = function (boardModel) {
     [2, 4, 6]
   ];
 
-  return diagonalsIndices.map(function (diagonals) {
-    return diagonals.map(function (value) {
+  return R.map(function (diagonals) {
+    return R.map(function (value) {
       return boardModel[value];
-    });
-  });
+    }, diagonals);
+  }, diagonalsIndices);
 };
 
 var isGameOver = function (boardModel) {
