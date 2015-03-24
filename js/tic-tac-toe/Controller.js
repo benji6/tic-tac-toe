@@ -1,13 +1,19 @@
 var BoardView = require('./BoardView.js');
 var MessageView = require('./MessageView.js');
 var BoardModel = require('./BoardModel.js');
-var PlayerModel = require('./PlayerModel.js');
-var equals = require('../utils/equals.js');
+var R = require('ramda');
 
 var boardIsFull = function (boardModel) {
   return !boardModel.filter(function (cell) {
     return cell === 0;
   }).length;
+};
+
+var computePlayerTurn = function (boardModel) {
+  var numberOfNoughts = boardModel.filter(R.eq(1)).length;
+  var numberOfCrosses = boardModel.filter(R.eq(2)).length;
+
+  return numberOfNoughts === numberOfCrosses ? 1 : 2;
 };
 
 var getRowsFromBoardModel = function (boardModel) {
@@ -56,7 +62,7 @@ var isGameOver = function (boardModel) {
 };
 
 var isThreeInARow = function (line) {
-  return line.every(equals(1)) || line.every(equals(2));
+  return line.every(R.eq(1)) || line.every(R.eq(2));
 };
 
 var isValidMove = function (boardModel, index) {
@@ -73,13 +79,9 @@ var updateBoardModel = function (set, index, player) {
   set(index, player);
 };
 
-var updatePlayerModel = function (set, currentPlayer) {
-  set(currentPlayer === 1 ? 2 : 1);
-};
-
 module.exports = function (parentDomEl) {
   var boardModel = BoardModel();
-  var playerModel = PlayerModel();
+
   var renderBoardView = function () {};
   var renderMessageView = function () {};
 
@@ -87,17 +89,16 @@ module.exports = function (parentDomEl) {
     if (!isValidMove(boardModel.get(), index)) {
       return;
     }
-    updateBoardModel(boardModel.set, index, playerModel.get());
+    updateBoardModel(boardModel.set, index, computePlayerTurn(boardModel.get()));
     renderBoardView(boardModel.get());
     if (isVictory(boardModel.get())) {
-      renderMessageView(`Victory for ${playerModel.get() === 1 ? "noughts" : "crosses"}!`);
+      renderMessageView(`Victory for ${computePlayerTurn(boardModel.get()) === 1 ? "noughts" : "crosses"}!`);
       return;
     }
     if (boardIsFull(boardModel.get())) {
       renderMessageView(`Draw!`);
       return;
     }
-    updatePlayerModel(playerModel.set, playerModel.get());
   };
 
   renderBoardView = BoardView(boardModel.get(), userClick, parentDomEl);
