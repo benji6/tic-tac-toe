@@ -1,4 +1,5 @@
 var jsmlParse = require('jsml-parse');
+var R = require('ramda');
 
 var getCharacterFromModelCode = (code) => {
   switch (code) {
@@ -12,7 +13,7 @@ var getCharacterFromModelCode = (code) => {
 };
 
 var createJsml = function (boardModel, userClick) {
-  const ROW_AND_COLUMN_COUNT = Math.pow(boardModel.length, 0.5);
+  const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
 
   var center = {
     tag: "div",

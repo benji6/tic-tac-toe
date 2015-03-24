@@ -4,22 +4,22 @@ var BoardModel = require('./BoardModel.js');
 var R = require('ramda');
 
 var boardIsFull = function (boardModel) {
-  return !R.filter(R.eq(0), boardModel).length;
+  return R.not(R.length(R.filter(R.eq(0), boardModel)));
 };
 
 var computePlayerTurn = function (boardModel) {
-  var numberOfNoughts = R.filter(R.eq(1), boardModel).length;
-  var numberOfCrosses = R.filter(R.eq(2), boardModel).length;
+  var numberOfNoughts = R.length(R.filter(R.eq(1), boardModel));
+  var numberOfCrosses = R.length(R.filter(R.eq(2), boardModel));
 
-  return numberOfNoughts === numberOfCrosses ? 1 : 2;
+  return R.eq(numberOfNoughts, numberOfCrosses) ? 1 : 2;
 };
 
 var getRowsFromBoardModel = function (boardModel) {
-  const ROW_AND_COLUMN_COUNT = Math.pow(boardModel.length, 0.5);
+  const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
 
   return boardModel.reduce(function (acc, cell, index) {
     var val = acc[Math.floor(index / ROW_AND_COLUMN_COUNT)];
-    if (Array.isArray(val)) {
+    if (R.isArrayLike(val)) {
       val.push(cell);
     } else {
       acc[Math.floor(index / ROW_AND_COLUMN_COUNT)] = [cell];
@@ -29,7 +29,7 @@ var getRowsFromBoardModel = function (boardModel) {
 };
 
 var getColumnsFromBoardModel = function (boardModel) {
-  const ROW_AND_COLUMN_COUNT = Math.pow(boardModel.length, 0.5);
+  const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
 
   return boardModel.reduce(function (acc, cell, index) {
     var val = acc[index % ROW_AND_COLUMN_COUNT];
