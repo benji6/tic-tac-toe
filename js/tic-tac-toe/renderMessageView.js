@@ -11,8 +11,5 @@ var createJsml = function (text = '') {
   };
 };
 
-module.exports = function (message) {
-  "use strict";
-
+module.exports = (message) =>
   jsmlParse(createJsml(message), document.getElementById('message_container'));
-};

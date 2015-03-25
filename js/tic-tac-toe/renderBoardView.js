@@ -31,9 +31,7 @@ var createJsml = function (boardModel, userClick) {
           count: ROW_AND_COLUMN_COUNT,
           text: (tdCount) => getCharacterFromModelCode(boardModel[trCount * ROW_AND_COLUMN_COUNT + tdCount]),
           callback: function (element, parentEl, tdCount) {
-            element.onclick = function () {
-              userClick(trCount * ROW_AND_COLUMN_COUNT + tdCount);
-            };
+            element.onclick = () => userClick(trCount * ROW_AND_COLUMN_COUNT + tdCount);
           }
         };
       }
@@ -44,10 +42,7 @@ var createJsml = function (boardModel, userClick) {
 };
 
 module.exports = function (boardModel, userClick) {
-  "use strict";
-
   var parentDomEl = document.getElementById('board_container');
-
   var domStructure = jsmlParse(createJsml(boardModel, userClick));
 
   while (parentDomEl.children.length) {
