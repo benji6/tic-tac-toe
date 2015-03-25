@@ -4,19 +4,22 @@ var BoardModel = require('./BoardModel.js');
 var R = require('ramda');
 
 var filteredLength = R.compose(R.length, R.filter);
+var equalsZero = R.eq(0);
+var equalsOne = R.eq(1);
+var equalsTwo = R.eq(2);
 
 var boardIsFull = function (boardModel) {
-  return R.not(filteredLength(R.eq(0), boardModel));
+  return R.not(filteredLength(equalsZero, boardModel));
 };
 
 var computePlayerTurn = function (boardModel) {
-  return R.eq(filteredLength(R.eq(2), boardModel), filteredLength(R.eq(1), boardModel)) ? 1 : 2;
+  return R.eq(filteredLength(equalsTwo, boardModel), filteredLength(equalsOne, boardModel)) ? 1 : 2;
 };
 
 var getRowsFromBoardModel = function (boardModel) {
   const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
 
-  return R.reduce(function (acc, cell, index) {
+  return R.reduceIndexed(function (acc, cell, index) {
     var val = acc[Math.floor(R.divide(index, ROW_AND_COLUMN_COUNT))];
     if (R.isArrayLike(val)) {
       val.push(cell);
@@ -30,7 +33,7 @@ var getRowsFromBoardModel = function (boardModel) {
 var getColumnsFromBoardModel = function (boardModel) {
   const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
 
-  return R.reduce(function (acc, cell, index) {
+  return R.reduceIndexed(function (acc, cell, index) {
     var val = acc[R.mathMod(index, ROW_AND_COLUMN_COUNT)];
     if (Array.isArray(val)) {
       val.push(cell);
@@ -60,7 +63,7 @@ var isGameOver = function (boardModel) {
 };
 
 var isThreeInARow = function (line) {
-  return R.or(line.every(R.eq(1)), line.every(R.eq(2)));
+  return R.or(line.every(equalsOne), line.every(equalsTwo));
 };
 
 var isValidMove = function (boardModel, index) {
@@ -69,8 +72,8 @@ var isValidMove = function (boardModel, index) {
 
 var isVictory = function (boardModel) {
   return R.or(getRowsFromBoardModel(boardModel).some(isThreeInARow),
-  R.or(getColumnsFromBoardModel(boardModel).some(isThreeInARow),
-  getDiagonalsFromBoardModel(boardModel).some(isThreeInARow)));
+    R.or(getColumnsFromBoardModel(boardModel).some(isThreeInARow),
+    getDiagonalsFromBoardModel(boardModel).some(isThreeInARow)));
 };
 
 var updateBoardModel = function (set, index, player) {
