@@ -1,31 +1,31 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var TicTacToe = require('./tic-tac-toe/controller.js');
-var createBoardModel = require('./tic-tac-toe/createBoardModel.js');
+const TicTacToe = require('./tic-tac-toe/controller.js');
+const createBoardModel = require('./tic-tac-toe/createBoardModel.js');
 
 TicTacToe(createBoardModel());
 
 },{"./tic-tac-toe/controller.js":2,"./tic-tac-toe/createBoardModel.js":3}],2:[function(require,module,exports){
-var renderBoardView = require('./renderBoardView.js');
-var renderMessageView = require('./renderMessageView.js');
-var R = require('ramda');
+const renderBoardView = require('./renderBoardView.js');
+const renderMessageView = require('./renderMessageView.js');
+const R = require('ramda');
 
 const Y = (f) => (x => f(v => x(x)(v)))(x => f(v => x(x)(v)));
 
-var filteredLength = R.compose(R.length, R.filter);
-var equalsZero = R.eq(0);
-var equalsOne = R.eq(1);
-var equalsTwo = R.eq(2);
+const filteredLength = R.compose(R.length, R.filter);
+const equalsZero = R.eq(0);
+const equalsOne = R.eq(1);
+const equalsTwo = R.eq(2);
 
-var boardIsFull = (boardModel) => R.not(filteredLength(equalsZero, boardModel));
+const boardIsFull = (boardModel) => R.not(filteredLength(equalsZero, boardModel));
 
-var computePlayerTurn = (boardModel) => R.eq(filteredLength(equalsTwo, boardModel),
+const computePlayerTurn = (boardModel) => R.eq(filteredLength(equalsTwo, boardModel),
   filteredLength(equalsOne, boardModel)) ? 1 : 2;
 
-var computeLastPlayerTurn = (boardModel) => equalsOne(computePlayerTurn(boardModel)) ? 2 : 1;
+const computeLastPlayerTurn = (boardModel) => equalsOne(computePlayerTurn(boardModel)) ? 2 : 1;
 
-var getRowsFromBoardModel = (boardModel) => R.reduceIndexed(function (acc, cell, index) {
+const getRowsFromBoardModel = (boardModel) => R.reduceIndexed(function (acc, cell, index) {
   const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
-  var val = acc[Math.floor(R.divide(index, ROW_AND_COLUMN_COUNT))];
+  const val = acc[Math.floor(R.divide(index, ROW_AND_COLUMN_COUNT))];
   if (R.isArrayLike(val)) {
     val.push(cell);
   } else {
@@ -34,9 +34,9 @@ var getRowsFromBoardModel = (boardModel) => R.reduceIndexed(function (acc, cell,
   return acc;
 }, [], boardModel);
 
-var getColumnsFromBoardModel = (boardModel) => R.reduceIndexed(function (acc, cell, index) {
+const getColumnsFromBoardModel = (boardModel) => R.reduceIndexed(function (acc, cell, index) {
   const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
-  var val = acc[R.mathMod(index, ROW_AND_COLUMN_COUNT)];
+  const val = acc[R.mathMod(index, ROW_AND_COLUMN_COUNT)];
   if (R.isArrayLike(val)) {
     val.push(cell);
   } else {
@@ -46,35 +46,35 @@ var getColumnsFromBoardModel = (boardModel) => R.reduceIndexed(function (acc, ce
 }, [], boardModel);
 
 //cheating! should be computing these!
-var getDiagonalsIndices = () => [
+const getDiagonalsIndices = () => [
   [0, 4, 8],
   [2, 4, 6]
 ];
 
-var getDiagonalsFromBoardModel = (boardModel) =>
+const getDiagonalsFromBoardModel = (boardModel) =>
   R.map((diagonals) =>
   R.map((value) =>
   boardModel[value], diagonals), getDiagonalsIndices());
 
-var isGameOver = (boardModel) => R.or(isVictory(boardModel), boardIsFull(boardModel));
+const isGameOver = (boardModel) => R.or(isVictory(boardModel), boardIsFull(boardModel));
 
-var isThreeInARow = (line) => R.or(line.every(equalsOne), line.every(equalsTwo));
+const isThreeInARow = (line) => R.or(line.every(equalsOne), line.every(equalsTwo));
 
-var isValidMove = function (boardModel, index) {
+const isValidMove = function (boardModel, index) {
   return R.and(equalsZero(boardModel[index]), R.not(isGameOver(boardModel)));
 };
 
-var isVictory = (boardModel) => R.concat(R.concat(getRowsFromBoardModel(boardModel),
+const isVictory = (boardModel) => R.concat(R.concat(getRowsFromBoardModel(boardModel),
   getColumnsFromBoardModel(boardModel)),
   getDiagonalsFromBoardModel(boardModel)).some(isThreeInARow);
 
 module.exports = Y((recurse) => (boardModel) => {
-  var onClick = (index) => {
+  const onClick = (index) => {
     if (!isValidMove(boardModel, index)) {
       return;
     }
 
-    var newModel = R.slice(0, R.length(boardModel))(boardModel);
+    const newModel = R.slice(0, R.length(boardModel))(boardModel);
     newModel[index] = computePlayerTurn(boardModel);
     recurse(newModel);
   };
@@ -93,15 +93,15 @@ module.exports = Y((recurse) => (boardModel) => {
 });
 
 },{"./renderBoardView.js":4,"./renderMessageView.js":5,"ramda":10}],3:[function(require,module,exports){
-var R = require('ramda');
+const R = require('ramda');
 
 module.exports = () => R.map(R.multiply(0), R.range(0, 9));
 
 },{"ramda":10}],4:[function(require,module,exports){
-var jsmlParse = require('jsml-parse');
-var R = require('ramda');
+const jsmlParse = require('jsml-parse');
+const R = require('ramda');
 
-var getCharacterFromModelCode = (code) => {
+const getCharacterFromModelCode = (code) => {
   switch (code) {
     case 0:
       return '';
@@ -112,10 +112,10 @@ var getCharacterFromModelCode = (code) => {
   }
 };
 
-var createJsml = function (boardModel, userClick) {
+const createJsml = function (boardModel, userClick) {
   const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
 
-  var center = {
+  const center = {
     tag: "div",
     className: "center"
   };
@@ -142,8 +142,8 @@ var createJsml = function (boardModel, userClick) {
 };
 
 module.exports = function (boardModel, userClick) {
-  var parentDomEl = document.getElementById('board_container');
-  var domStructure = jsmlParse(createJsml(boardModel, userClick));
+  const parentDomEl = document.getElementById('board_container');
+  const domStructure = jsmlParse(createJsml(boardModel, userClick));
 
   while (parentDomEl.children.length) {
     parentDomEl.removeChild(parentDomEl.children[0]);
@@ -153,9 +153,9 @@ module.exports = function (boardModel, userClick) {
 };
 
 },{"jsml-parse":9,"ramda":10}],5:[function(require,module,exports){
-var jsmlParse = require('jsml-parse');
+const jsmlParse = require('jsml-parse');
 
-var createJsml = function (text = '') {
+const createJsml = function (text = '') {
   return {
     tag: "div",
     className: "center",

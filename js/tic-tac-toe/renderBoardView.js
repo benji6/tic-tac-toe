@@ -1,7 +1,7 @@
-var jsmlParse = require('jsml-parse');
-var R = require('ramda');
+const jsmlParse = require('jsml-parse');
+const R = require('ramda');
 
-var getCharacterFromModelCode = (code) => {
+const getCharacterFromModelCode = (code) => {
   switch (code) {
     case 0:
       return '';
@@ -12,10 +12,10 @@ var getCharacterFromModelCode = (code) => {
   }
 };
 
-var createJsml = function (boardModel, userClick) {
+const createJsml = function (boardModel, userClick) {
   const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
 
-  var center = {
+  const center = {
     tag: "div",
     className: "center"
   };
@@ -42,8 +42,8 @@ var createJsml = function (boardModel, userClick) {
 };
 
 module.exports = function (boardModel, userClick) {
-  var parentDomEl = document.getElementById('board_container');
-  var domStructure = jsmlParse(createJsml(boardModel, userClick));
+  const parentDomEl = document.getElementById('board_container');
+  const domStructure = jsmlParse(createJsml(boardModel, userClick));
 
   while (parentDomEl.children.length) {
     parentDomEl.removeChild(parentDomEl.children[0]);
