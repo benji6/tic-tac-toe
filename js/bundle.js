@@ -95,26 +95,25 @@ var MessageView = require('./MessageView.js');
 var BoardModel = require('./BoardModel.js');
 var R = require('ramda');
 
+var filteredLength = R.compose(R.length, R.filter);
+
 var boardIsFull = function (boardModel) {
-  return R.not(R.length(R.filter(R.eq(0), boardModel)));
+  return R.not(filteredLength(R.eq(0), boardModel));
 };
 
 var computePlayerTurn = function (boardModel) {
-  var numberOfNoughts = R.length(R.filter(R.eq(1), boardModel));
-  var numberOfCrosses = R.length(R.filter(R.eq(2), boardModel));
-
-  return R.eq(numberOfNoughts, numberOfCrosses) ? 1 : 2;
+  return R.eq(filteredLength(R.eq(2), boardModel), filteredLength(R.eq(1), boardModel)) ? 1 : 2;
 };
 
 var getRowsFromBoardModel = function (boardModel) {
   const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
 
   return R.reduce(function (acc, cell, index) {
-    var val = acc[Math.floor(index / ROW_AND_COLUMN_COUNT)];
+    var val = acc[Math.floor(R.divide(index, ROW_AND_COLUMN_COUNT))];
     if (R.isArrayLike(val)) {
       val.push(cell);
     } else {
-      acc[Math.floor(index / ROW_AND_COLUMN_COUNT)] = [cell];
+      acc[Math.floor(R.divide(index, ROW_AND_COLUMN_COUNT))] = [cell];
     }
     return acc;
   }, [], boardModel);
@@ -124,17 +123,18 @@ var getColumnsFromBoardModel = function (boardModel) {
   const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
 
   return R.reduce(function (acc, cell, index) {
-    var val = acc[index % ROW_AND_COLUMN_COUNT];
+    var val = acc[R.mathMod(index, ROW_AND_COLUMN_COUNT)];
     if (Array.isArray(val)) {
       val.push(cell);
     } else {
-      acc[index % ROW_AND_COLUMN_COUNT] = [cell];
+      acc[R.mathMod(index, ROW_AND_COLUMN_COUNT)] = [cell];
     }
     return acc;
   }, [], boardModel);
 };
 
 var getDiagonalsFromBoardModel = function (boardModel) {
+  //cheating! should be computing these!
   var diagonalsIndices = [
     [0, 4, 8],
     [2, 4, 6]
@@ -156,13 +156,13 @@ var isThreeInARow = function (line) {
 };
 
 var isValidMove = function (boardModel, index) {
-  return R.and(R.not(R.eq(boardModel[index], 1)), R.not(isGameOver(boardModel)));
+  return R.and(R.eq(boardModel[index], 0), R.not(isGameOver(boardModel)));
 };
 
 var isVictory = function (boardModel) {
-  return getRowsFromBoardModel(boardModel).some(isThreeInARow) ||
-  getColumnsFromBoardModel(boardModel).some(isThreeInARow) ||
-  getDiagonalsFromBoardModel(boardModel).some(isThreeInARow);
+  return R.or(getRowsFromBoardModel(boardModel).some(isThreeInARow),
+  R.or(getColumnsFromBoardModel(boardModel).some(isThreeInARow),
+  getDiagonalsFromBoardModel(boardModel).some(isThreeInARow)));
 };
 
 var updateBoardModel = function (set, index, player) {
@@ -183,7 +183,7 @@ module.exports = function (parentDomEl) {
     updateBoardModel(boardModel.set, index, currentPlayerTurn);
     renderBoardView(boardModel.get());
     if (isVictory(boardModel.get())) {
-      renderMessageView(`Victory for ${currentPlayerTurn === 1 ? "noughts" : "crosses"}!`);
+      renderMessageView(`Victory for ${R.eq(currentPlayerTurn, 1) ? "noughts" : "crosses"}!`);
       return;
     }
     if (boardIsFull(boardModel.get())) {
