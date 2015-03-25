@@ -61,7 +61,7 @@ var isVictory = (boardModel) => R.concat(R.concat(getRowsFromBoardModel(boardMod
   getColumnsFromBoardModel(boardModel)),
   getDiagonalsFromBoardModel(boardModel)).some(isThreeInARow);
 
-module.exports = (recurse) => (boardModel) => {
+module.exports = Y((recurse) => (boardModel) => {
   var onClick = (index) => {
     if (!isValidMove(boardModel, index)) {
       return;
@@ -83,4 +83,4 @@ module.exports = (recurse) => (boardModel) => {
     renderMessageView(`Draw!`);
     return;
   }
-};
+});
