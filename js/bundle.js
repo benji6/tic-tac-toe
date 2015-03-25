@@ -67,8 +67,6 @@ var isVictory = (boardModel) => R.concat(R.concat(getRowsFromBoardModel(boardMod
   getDiagonalsFromBoardModel(boardModel)).some(isThreeInARow);
 
 module.exports = function recurse (boardModel) {
-  "use strict";
-
   var onClick = function (index) {
     if (!isValidMove(boardModel, index)) {
       return;
@@ -82,7 +80,7 @@ module.exports = function recurse (boardModel) {
   renderBoardView(boardModel, onClick);
 
   if (isVictory(boardModel)) {
-    renderMessageView(`Victory for ${R.eq(computeLastPlayerTurn(boardModel), 1) ? "noughts" : "crosses"}!`);
+    renderMessageView(`Victory for ${equalsOne(computeLastPlayerTurn(boardModel)) ? "noughts" : "crosses"}!`);
     return;
   }
 
