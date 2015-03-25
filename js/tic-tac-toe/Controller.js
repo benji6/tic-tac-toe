@@ -17,7 +17,7 @@ var computePlayerTurn = function (boardModel) {
 var getRowsFromBoardModel = function (boardModel) {
   const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
 
-  return boardModel.reduce(function (acc, cell, index) {
+  return R.reduce(function (acc, cell, index) {
     var val = acc[Math.floor(index / ROW_AND_COLUMN_COUNT)];
     if (R.isArrayLike(val)) {
       val.push(cell);
@@ -25,13 +25,13 @@ var getRowsFromBoardModel = function (boardModel) {
       acc[Math.floor(index / ROW_AND_COLUMN_COUNT)] = [cell];
     }
     return acc;
-  }, []);
+  }, [], boardModel);
 };
 
 var getColumnsFromBoardModel = function (boardModel) {
   const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
 
-  return boardModel.reduce(function (acc, cell, index) {
+  return R.reduce(function (acc, cell, index) {
     var val = acc[index % ROW_AND_COLUMN_COUNT];
     if (Array.isArray(val)) {
       val.push(cell);
@@ -39,7 +39,7 @@ var getColumnsFromBoardModel = function (boardModel) {
       acc[index % ROW_AND_COLUMN_COUNT] = [cell];
     }
     return acc;
-  }, []);
+  }, [], boardModel);
 };
 
 var getDiagonalsFromBoardModel = function (boardModel) {
@@ -56,15 +56,15 @@ var getDiagonalsFromBoardModel = function (boardModel) {
 };
 
 var isGameOver = function (boardModel) {
-  return isVictory(boardModel) || boardIsFull(boardModel);
+  return R.or(isVictory(boardModel), boardIsFull(boardModel));
 };
 
 var isThreeInARow = function (line) {
-  return line.every(R.eq(1)) || line.every(R.eq(2));
+  return R.or(line.every(R.eq(1)), line.every(R.eq(2)));
 };
 
 var isValidMove = function (boardModel, index) {
-  return boardModel[index] !== 1 && !isGameOver(boardModel);
+  return R.and(R.not(R.eq(boardModel[index], 1)), R.not(isGameOver(boardModel)));
 };
 
 var isVictory = function (boardModel) {
