@@ -9,6 +9,8 @@ var renderBoardView = require('./renderBoardView.js');
 var renderMessageView = require('./renderMessageView.js');
 var R = require('ramda');
 
+const Y = (f) => (x => f(v => x(x)(v)))(x => f(v => x(x)(v)));
+
 var filteredLength = R.compose(R.length, R.filter);
 var equalsZero = R.eq(0);
 var equalsOne = R.eq(1);
@@ -66,8 +68,8 @@ var isVictory = (boardModel) => R.concat(R.concat(getRowsFromBoardModel(boardMod
   getColumnsFromBoardModel(boardModel)),
   getDiagonalsFromBoardModel(boardModel)).some(isThreeInARow);
 
-module.exports = function recurse (boardModel) {
-  var onClick = function (index) {
+module.exports = (recurse) => (boardModel) => {
+  var onClick = (index) => {
     if (!isValidMove(boardModel, index)) {
       return;
     }
