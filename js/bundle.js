@@ -74,7 +74,7 @@ module.exports = Y((recurse) => (boardModel) => {
       return;
     }
 
-    const newModel = R.slice(0, R.length(boardModel))(boardModel);
+    var newModel = R.slice(0, R.length(boardModel))(boardModel);
     newModel[index] = computePlayerTurn(boardModel);
     recurse(newModel);
   };
