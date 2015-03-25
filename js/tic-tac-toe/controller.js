@@ -1,6 +1,5 @@
-var BoardView = require('./BoardView.js');
-var MessageView = require('./MessageView.js');
-var BoardModel = require('./BoardModel.js');
+var renderBoardView = require('./renderBoardView.js');
+var renderMessageView = require('./renderMessageView.js');
 var R = require('ramda');
 
 var filteredLength = R.compose(R.length, R.filter);
@@ -14,6 +13,10 @@ var boardIsFull = function (boardModel) {
 
 var computePlayerTurn = function (boardModel) {
   return R.eq(filteredLength(equalsTwo, boardModel), filteredLength(equalsOne, boardModel)) ? 1 : 2;
+};
+
+var computeLastPlayerTurn = function (boardModel) {
+  return equalsOne(computePlayerTurn(boardModel)) ? 2 : 1;
 };
 
 var getRowsFromBoardModel = function (boardModel) {
@@ -67,42 +70,37 @@ var isThreeInARow = function (line) {
 };
 
 var isValidMove = function (boardModel, index) {
-  return R.and(R.eq(boardModel[index], 0), R.not(isGameOver(boardModel)));
+  return R.and(equalsZero(boardModel[index]), R.not(isGameOver(boardModel)));
 };
 
 var isVictory = function (boardModel) {
-  return R.or(getRowsFromBoardModel(boardModel).some(isThreeInARow),
-    R.or(getColumnsFromBoardModel(boardModel).some(isThreeInARow),
-    getDiagonalsFromBoardModel(boardModel).some(isThreeInARow)));
+  return R.concat(R.concat(getRowsFromBoardModel(boardModel),
+    getColumnsFromBoardModel(boardModel)),
+    getDiagonalsFromBoardModel(boardModel)).some(isThreeInARow);
 };
 
-var updateBoardModel = function (set, index, player) {
-  set(index, player);
-};
+module.exports = function recurse (boardModel) {
+  "use strict";
 
-module.exports = function (parentDomEl) {
-  var boardModel = BoardModel();
-
-  var renderBoardView = function () {};
-  var renderMessageView = function () {};
-
-  var userClick = function (index) {
-    if (!isValidMove(boardModel.get(), index)) {
+  var onClick = function (index) {
+    if (!isValidMove(boardModel, index)) {
       return;
     }
-    var currentPlayerTurn = computePlayerTurn(boardModel.get());
-    updateBoardModel(boardModel.set, index, currentPlayerTurn);
-    renderBoardView(boardModel.get());
-    if (isVictory(boardModel.get())) {
-      renderMessageView(`Victory for ${R.eq(currentPlayerTurn, 1) ? "noughts" : "crosses"}!`);
-      return;
-    }
-    if (boardIsFull(boardModel.get())) {
-      renderMessageView(`Draw!`);
-      return;
-    }
+
+    var newModel = R.slice(0, R.length(boardModel))(boardModel);
+    newModel[index] = computePlayerTurn(boardModel);
+    recurse(newModel);
   };
 
-  renderBoardView = BoardView(boardModel.get(), userClick, parentDomEl);
-  renderMessageView = MessageView();
+  renderBoardView(boardModel, onClick);
+
+  if (isVictory(boardModel)) {
+    renderMessageView(`Victory for ${R.eq(computeLastPlayerTurn(boardModel), 1) ? "noughts" : "crosses"}!`);
+    return;
+  }
+  
+  if (boardIsFull(boardModel)) {
+    renderMessageView(`Draw!`);
+    return;
+  }
 };

@@ -43,14 +43,16 @@ var createJsml = function (boardModel, userClick) {
   return center;
 };
 
-module.exports = function (boardModel, userClick, parentDomEl) {
+module.exports = function (boardModel, userClick) {
+  "use strict";
+
+  var parentDomEl = document.getElementById('board_container');
+
   var domStructure = jsmlParse(createJsml(boardModel, userClick));
 
-  document.body.appendChild(domStructure);
+  while (parentDomEl.children.length) {
+    parentDomEl.removeChild(parentDomEl.children[0]);
+  }
 
-  return function (boardModel) {
-    domStructure.parentNode.removeChild(domStructure);
-    domStructure = jsmlParse(createJsml(boardModel, userClick));
-    document.body.appendChild(domStructure);
-  };
+  parentDomEl.appendChild(domStructure);
 };

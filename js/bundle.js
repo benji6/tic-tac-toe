@@ -1,98 +1,12 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var TicTacToe = require('./tic-tac-toe/Controller.js');
+var TicTacToe = require('./tic-tac-toe/controller.js');
+var createBoardModel = require('./tic-tac-toe/createBoardModel.js');
 
-TicTacToe(document.body);
+TicTacToe(createBoardModel());
 
-},{"./tic-tac-toe/Controller.js":4}],2:[function(require,module,exports){
-module.exports = function () {
-  var board = [];
-
-  for (var i = 0; i < 9; i++) {
-    board[i] = 0;
-  }
-
-  var get = function () {
-    return Object.freeze(board);
-  };
-
-  var set = function (index, val) {
-    if (index > 8 || !(val === 1 || val === 2)) {
-      return;
-    }
-    var newModel = board.slice();
-    newModel[index] = val;
-    board = newModel;
-    return Object.freeze(board);
-  };
-
-  return {
-    get: get,
-    set: set
-  };
-};
-
-},{}],3:[function(require,module,exports){
-var jsmlParse = require('jsml-parse');
-var R = require('ramda');
-
-var getCharacterFromModelCode = (code) => {
-  switch (code) {
-    case 0:
-      return '';
-    case 1:
-      return 'O';
-    case 2:
-      return 'X';
-  }
-};
-
-var createJsml = function (boardModel, userClick) {
-  const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
-
-  var center = {
-    tag: "div",
-    className: "center"
-  };
-
-  center.children = {
-    tag: "table",
-    children: {
-      tag: "tr",
-      count: ROW_AND_COLUMN_COUNT,
-      children: function (trCount) {
-        return {
-          tag: "td",
-          count: ROW_AND_COLUMN_COUNT,
-          text: (tdCount) => getCharacterFromModelCode(boardModel[trCount * ROW_AND_COLUMN_COUNT + tdCount]),
-          callback: function (element, parentEl, tdCount) {
-            element.onclick = function () {
-              userClick(trCount * ROW_AND_COLUMN_COUNT + tdCount);
-            };
-          }
-        };
-      }
-    }
-  };
-
-  return center;
-};
-
-module.exports = function (boardModel, userClick, parentDomEl) {
-  var domStructure = jsmlParse(createJsml(boardModel, userClick));
-
-  document.body.appendChild(domStructure);
-
-  return function (boardModel) {
-    domStructure.parentNode.removeChild(domStructure);
-    domStructure = jsmlParse(createJsml(boardModel, userClick));
-    document.body.appendChild(domStructure);
-  };
-};
-
-},{"jsml-parse":9,"ramda":10}],4:[function(require,module,exports){
-var BoardView = require('./BoardView.js');
-var MessageView = require('./MessageView.js');
-var BoardModel = require('./BoardModel.js');
+},{"./tic-tac-toe/controller.js":2,"./tic-tac-toe/createBoardModel.js":3}],2:[function(require,module,exports){
+var renderBoardView = require('./renderBoardView.js');
+var renderMessageView = require('./renderMessageView.js');
 var R = require('ramda');
 
 var filteredLength = R.compose(R.length, R.filter);
@@ -106,6 +20,10 @@ var boardIsFull = function (boardModel) {
 
 var computePlayerTurn = function (boardModel) {
   return R.eq(filteredLength(equalsTwo, boardModel), filteredLength(equalsOne, boardModel)) ? 1 : 2;
+};
+
+var computeLastPlayerTurn = function (boardModel) {
+  return equalsOne(computePlayerTurn(boardModel)) ? 2 : 1;
 };
 
 var getRowsFromBoardModel = function (boardModel) {
@@ -159,47 +77,111 @@ var isThreeInARow = function (line) {
 };
 
 var isValidMove = function (boardModel, index) {
-  return R.and(R.eq(boardModel[index], 0), R.not(isGameOver(boardModel)));
+  return R.and(equalsZero(boardModel[index]), R.not(isGameOver(boardModel)));
 };
 
 var isVictory = function (boardModel) {
-  return R.or(getRowsFromBoardModel(boardModel).some(isThreeInARow),
-    R.or(getColumnsFromBoardModel(boardModel).some(isThreeInARow),
-    getDiagonalsFromBoardModel(boardModel).some(isThreeInARow)));
+  return R.concat(R.concat(getRowsFromBoardModel(boardModel),
+    getColumnsFromBoardModel(boardModel)),
+    getDiagonalsFromBoardModel(boardModel)).some(isThreeInARow);
 };
 
-var updateBoardModel = function (set, index, player) {
-  set(index, player);
+module.exports = function recurse (boardModel) {
+  "use strict";
+
+  var onClick = function (index) {
+    if (!isValidMove(boardModel, index)) {
+      return;
+    }
+
+    var newModel = R.slice(0, R.length(boardModel))(boardModel);
+    newModel[index] = computePlayerTurn(boardModel);
+    recurse(newModel);
+  };
+
+  renderBoardView(boardModel, onClick);
+
+  if (isVictory(boardModel)) {
+    renderMessageView(`Victory for ${R.eq(computeLastPlayerTurn(boardModel), 1) ? "noughts" : "crosses"}!`);
+    return;
+  }
+  
+  if (boardIsFull(boardModel)) {
+    renderMessageView(`Draw!`);
+    return;
+  }
 };
 
-module.exports = function (parentDomEl) {
-  var boardModel = BoardModel();
+},{"./renderBoardView.js":4,"./renderMessageView.js":5,"ramda":10}],3:[function(require,module,exports){
+var R = require('ramda');
 
-  var renderBoardView = function () {};
-  var renderMessageView = function () {};
+module.exports = function () {
+  "use strict";
 
-  var userClick = function (index) {
-    if (!isValidMove(boardModel.get(), index)) {
-      return;
-    }
-    var currentPlayerTurn = computePlayerTurn(boardModel.get());
-    updateBoardModel(boardModel.set, index, currentPlayerTurn);
-    renderBoardView(boardModel.get());
-    if (isVictory(boardModel.get())) {
-      renderMessageView(`Victory for ${R.eq(currentPlayerTurn, 1) ? "noughts" : "crosses"}!`);
-      return;
-    }
-    if (boardIsFull(boardModel.get())) {
-      renderMessageView(`Draw!`);
-      return;
+  return R.map(R.multiply(0), R.range(0, 9));
+};
+
+},{"ramda":10}],4:[function(require,module,exports){
+var jsmlParse = require('jsml-parse');
+var R = require('ramda');
+
+var getCharacterFromModelCode = (code) => {
+  switch (code) {
+    case 0:
+      return '';
+    case 1:
+      return 'O';
+    case 2:
+      return 'X';
+  }
+};
+
+var createJsml = function (boardModel, userClick) {
+  const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
+
+  var center = {
+    tag: "div",
+    className: "center"
+  };
+
+  center.children = {
+    tag: "table",
+    children: {
+      tag: "tr",
+      count: ROW_AND_COLUMN_COUNT,
+      children: function (trCount) {
+        return {
+          tag: "td",
+          count: ROW_AND_COLUMN_COUNT,
+          text: (tdCount) => getCharacterFromModelCode(boardModel[trCount * ROW_AND_COLUMN_COUNT + tdCount]),
+          callback: function (element, parentEl, tdCount) {
+            element.onclick = function () {
+              userClick(trCount * ROW_AND_COLUMN_COUNT + tdCount);
+            };
+          }
+        };
+      }
     }
   };
 
-  renderBoardView = BoardView(boardModel.get(), userClick, parentDomEl);
-  renderMessageView = MessageView();
+  return center;
 };
 
-},{"./BoardModel.js":2,"./BoardView.js":3,"./MessageView.js":5,"ramda":10}],5:[function(require,module,exports){
+module.exports = function (boardModel, userClick) {
+  "use strict";
+
+  var parentDomEl = document.getElementById('board_container');
+
+  var domStructure = jsmlParse(createJsml(boardModel, userClick));
+
+  while (parentDomEl.children.length) {
+    parentDomEl.removeChild(parentDomEl.children[0]);
+  }
+
+  parentDomEl.appendChild(domStructure);
+};
+
+},{"jsml-parse":9,"ramda":10}],5:[function(require,module,exports){
 var jsmlParse = require('jsml-parse');
 
 var createJsml = function (text = '') {
@@ -213,16 +195,10 @@ var createJsml = function (text = '') {
   };
 };
 
-module.exports = function (parentDomEl) {
-  var domStructure = jsmlParse(createJsml());
+module.exports = function (message) {
+  "use strict";
 
-  document.body.appendChild(domStructure);
-
-  return function (message) {
-    domStructure.parentNode.removeChild(domStructure);
-    domStructure = jsmlParse(createJsml(message));
-    document.body.appendChild(domStructure);
-  };
+  jsmlParse(createJsml(message), document.getElementById('message_container'));
 };
 
 },{"jsml-parse":9}],6:[function(require,module,exports){
