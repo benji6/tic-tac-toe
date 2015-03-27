@@ -51,15 +51,15 @@ const getDiagonalsFromBoardModel = (boardModel) =>
 
 const isGameOver = (boardModel) => R.or(isVictory(boardModel), boardIsFull(boardModel));
 
-const isThreeInARow = (line) => R.or(line.every(equalsOne), line.every(equalsTwo));
+const isThreeInARow = (line) => R.or(R.all(equalsOne, line), R.all(equalsTwo, line));
 
 const isValidMove = function (boardModel, index) {
   return R.and(equalsZero(boardModel[index]), R.not(isGameOver(boardModel)));
 };
 
-const isVictory = (boardModel) => R.concat(R.concat(getRowsFromBoardModel(boardModel),
+const isVictory = (boardModel) => R.any(isThreeInARow, R.concat(R.concat(getRowsFromBoardModel(boardModel),
   getColumnsFromBoardModel(boardModel)),
-  getDiagonalsFromBoardModel(boardModel)).some(isThreeInARow);
+  getDiagonalsFromBoardModel(boardModel)));
 
 module.exports = Y((recurse) => (boardModel) => {
   const onClick = (index) => {
