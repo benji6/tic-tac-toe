@@ -25,13 +25,11 @@ const computeLastPlayerTurn = (boardModel) => equalsOne(computePlayerTurn(boardM
 
 const computeRowAndColumnCount = (list) => Math.pow(R.length(list), 0.5);
 
-const getRows = (boardModel) => R.map((index) => R.rejectIndexed(function (cell, cellIndex) {
-  return Math.floor(R.subtract(R.divide(cellIndex, computeRowAndColumnCount(boardModel)), index));
-})(boardModel), R.range(0, computeRowAndColumnCount(boardModel)));
+const getRows = (boardModel) => R.map((index) => R.rejectIndexed((cell, cellIndex) =>
+  Math.floor(R.subtract(R.divide(cellIndex, computeRowAndColumnCount(boardModel)), index)))(boardModel), R.range(0, computeRowAndColumnCount(boardModel)));
 
-const getColumns = (boardModel) => R.map((index) => R.rejectIndexed(function (cell, cellIndex) {
-  return R.mathMod(R.subtract(cellIndex, index), computeRowAndColumnCount(boardModel));
-})(boardModel), R.range(0, computeRowAndColumnCount(boardModel)));
+const getColumns = (boardModel) => R.map((index) => R.rejectIndexed((cell, cellIndex) =>
+  R.mathMod(R.subtract(cellIndex, index), computeRowAndColumnCount(boardModel)))(boardModel), R.range(0, computeRowAndColumnCount(boardModel)));
 
 //cheating! should be computing these!
 const getDiagonalsIndices = () => [
@@ -48,9 +46,8 @@ const isGameOver = (boardModel) => R.or(isVictory(boardModel), boardIsFull(board
 
 const isThreeInARow = (line) => R.or(R.all(equalsOne, line), R.all(equalsTwo, line));
 
-const isValidMove = R.curry(function (boardModel, index) {
-  return R.and(equalsZero(boardModel[index]), R.not(isGameOver(boardModel)));
-});
+const isValidMove = R.curry((boardModel, index) =>
+  R.and(equalsZero(boardModel[index]), R.not(isGameOver(boardModel))));
 
 const isVictory = (boardModel) => R.any(isThreeInARow, R.concat(R.concat(getRows(boardModel),
   getColumns(boardModel)),
@@ -59,9 +56,10 @@ const isVictory = (boardModel) => R.any(isThreeInARow, R.concat(R.concat(getRows
 module.exports = Y((recurse) => (boardModel) => {
   const onClick = (index) => R.ifElse(
     isValidMove(boardModel),
-    (index) => recurse(R.mapIndexed(function (element, idx) {
-      return R.eq(index, idx) ? computePlayerTurn(boardModel) : boardModel[idx];
-    }, R.range(0, R.length(boardModel)))),
+    (index) => recurse(R.mapIndexed((element, idx) =>
+      R.eq(index, idx) ?
+      computePlayerTurn(boardModel) :
+      boardModel[idx], R.range(0, R.length(boardModel)))),
     R.F
   )(index);
 
