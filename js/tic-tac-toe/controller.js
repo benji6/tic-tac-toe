@@ -24,16 +24,17 @@ const getRows = (boardModel) => R.map((index) => R.rejectIndexed((cell, cellInde
 const getColumns = (boardModel) => R.map((index) => R.rejectIndexed((cell, cellIndex) =>
   R.mathMod(R.subtract(cellIndex, index), computeRowAndColumnCount(boardModel)))(boardModel), R.range(0, computeRowAndColumnCount(boardModel)));
 
-//cheating! should be computing these!
-const getDiagonalsIndices = () => [
-  [0, 4, 8],
-  [2, 4, 6]
-];
+const getDiagonalsIndices = (boardModel) => R.concat(
+  [R.map((index) =>
+    R.multiply(index, R.add(computeRowAndColumnCount(boardModel), 1)), R.range(0, computeRowAndColumnCount(boardModel)))],
+  [R.map((index) =>
+    R.multiply(R.inc(index), R.subtract(computeRowAndColumnCount(boardModel), 1)), R.range(0, computeRowAndColumnCount(boardModel)))]
+);
 
-const getDiagonalsFromBoardModel = (boardModel) =>
+const getDiagonals = (boardModel) =>
   R.map((diagonals) =>
   R.map((value) =>
-  boardModel[value], diagonals), getDiagonalsIndices());
+  boardModel[value], diagonals), getDiagonalsIndices(boardModel));
 
 const isGameOver = (boardModel) => R.or(isVictory(boardModel), boardIsFull(boardModel));
 
@@ -44,7 +45,7 @@ const isValidMove = R.curry((boardModel, index) =>
 
 const isVictory = (boardModel) => R.any(isThreeInARow, R.concat(R.concat(getRows(boardModel),
   getColumns(boardModel)),
-  getDiagonalsFromBoardModel(boardModel)));
+  getDiagonals(boardModel)));
 
 module.exports = Y((recurse) => (boardModel) => {
   const onClick = (index) => R.ifElse(
