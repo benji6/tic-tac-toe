@@ -6,7 +6,7 @@ TicTacToe(createBoardModel());
 
 },{"./tic-tac-toe/controller.js":2,"./tic-tac-toe/createBoardModel.js":3}],2:[function(require,module,exports){
 const renderBoardView = require('./renderBoardView.js');
-const renderMessageView = require('./renderMessageView.js');
+const messageView = require('./messageView.js');
 const R = require('ramda');
 
 const Y = f => (x => f(v => x(x)(v)))(x => f(v => x(x)(v)));
@@ -26,22 +26,22 @@ const computeLastPlayerTurn = (boardModel) => equalsOne(computePlayerTurn(boardM
 const getRowsFromBoardModel = (boardModel) => R.reduceIndexed(function (acc, cell, index) {
   const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
   const val = acc[Math.floor(R.divide(index, ROW_AND_COLUMN_COUNT))];
-  if (R.isArrayLike(val)) {
-    val.push(cell);
-  } else {
-    acc[Math.floor(R.divide(index, ROW_AND_COLUMN_COUNT))] = [cell];
-  }
+  R.ifElse(
+    R.isArrayLike,
+    (val) => val.push(cell),
+    (val) => acc[Math.floor(R.divide(index, ROW_AND_COLUMN_COUNT))] = [cell]
+  )(val);
   return acc;
 }, [], boardModel);
 
 const getColumnsFromBoardModel = (boardModel) => R.reduceIndexed(function (acc, cell, index) {
   const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
   const val = acc[R.mathMod(index, ROW_AND_COLUMN_COUNT)];
-  if (R.isArrayLike(val)) {
-    val.push(cell);
-  } else {
-    acc[R.mathMod(index, ROW_AND_COLUMN_COUNT)] = [cell];
-  }
+  R.ifElse(
+    R.isArrayLike,
+    (val) => val.push(cell),
+    (val) => acc[R.mathMod(index, ROW_AND_COLUMN_COUNT)] = [cell]
+  )(val);
   return acc;
 }, [], boardModel);
 
@@ -60,44 +60,64 @@ const isGameOver = (boardModel) => R.or(isVictory(boardModel), boardIsFull(board
 
 const isThreeInARow = (line) => R.or(R.all(equalsOne, line), R.all(equalsTwo, line));
 
-const isValidMove = function (boardModel, index) {
+const isValidMove = R.curry(function (boardModel, index) {
   return R.and(equalsZero(boardModel[index]), R.not(isGameOver(boardModel)));
-};
+});
 
 const isVictory = (boardModel) => R.any(isThreeInARow, R.concat(R.concat(getRowsFromBoardModel(boardModel),
   getColumnsFromBoardModel(boardModel)),
   getDiagonalsFromBoardModel(boardModel)));
 
 module.exports = Y((recurse) => (boardModel) => {
-  const onClick = (index) => {
-    if (!isValidMove(boardModel, index)) {
-      return;
-    }
-
-    var newModel = R.slice(0, R.length(boardModel))(boardModel);
-    newModel[index] = computePlayerTurn(boardModel);
-    recurse(newModel);
-  };
+  const onClick = (index) => R.ifElse(
+    isValidMove(boardModel),
+    (index) => recurse(R.mapIndexed(function (element, idx) {
+      return R.eq(index, idx) ? computePlayerTurn(boardModel) : boardModel[idx];
+    }, R.range(0, R.length(boardModel)))),
+    R.F
+  )(index);
 
   renderBoardView(boardModel, onClick);
 
-  if (isVictory(boardModel)) {
-    renderMessageView(`Victory for ${equalsOne(computeLastPlayerTurn(boardModel)) ? "noughts" : "crosses"}!`);
-    return;
-  }
-
-  if (boardIsFull(boardModel)) {
-    renderMessageView(`Draw!`);
-    return;
-  }
+  R.cond(
+    [isVictory, (boardModel) => messageView.renderVictoryMessage(equalsOne(computeLastPlayerTurn(boardModel)) ? "noughts" : "crosses")],
+    [boardIsFull, messageView.renderDrawMessage]
+  )(boardModel);
 });
 
-},{"./renderBoardView.js":4,"./renderMessageView.js":5,"ramda":10}],3:[function(require,module,exports){
+},{"./messageView.js":4,"./renderBoardView.js":5,"ramda":10}],3:[function(require,module,exports){
 const R = require('ramda');
 
 module.exports = () => R.map(R.always(0), R.range(0, 9));
 
 },{"ramda":10}],4:[function(require,module,exports){
+const jsmlParse = require('jsml-parse');
+
+const createJsml = function (text = '') {
+  return {
+    tag: "div",
+    className: "center",
+    children: {
+      tag: "output",
+      text
+    }
+  };
+};
+
+const renderMesssage = (message) =>
+  jsmlParse(createJsml(message), document.getElementById('message_container'));
+
+const renderVictoryMessage = (winner) =>
+  renderMesssage(`Victory for ${winner}!`);
+
+const renderDrawMessage = () => renderMesssage(`Draw`);
+
+module.exports = {
+  renderVictoryMessage,
+  renderDrawMessage
+};
+
+},{"jsml-parse":9}],5:[function(require,module,exports){
 const jsmlParse = require('jsml-parse');
 const R = require('ramda');
 
@@ -147,24 +167,7 @@ module.exports = function (boardModel, userClick) {
   parentDomEl.appendChild(domStructure);
 };
 
-},{"jsml-parse":9,"ramda":10}],5:[function(require,module,exports){
-const jsmlParse = require('jsml-parse');
-
-const createJsml = function (text = '') {
-  return {
-    tag: "div",
-    className: "center",
-    children: {
-      tag: "output",
-      text
-    }
-  };
-};
-
-module.exports = (message) =>
-  jsmlParse(createJsml(message), document.getElementById('message_container'));
-
-},{"jsml-parse":9}],6:[function(require,module,exports){
+},{"jsml-parse":9,"ramda":10}],6:[function(require,module,exports){
 module.exports = function (text, domEl, count) {
   if (typeof text === 'function') {
     domEl.appendChild(document.createTextNode(text(count)));
