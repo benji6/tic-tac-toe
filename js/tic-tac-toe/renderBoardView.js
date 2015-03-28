@@ -9,7 +9,7 @@ const getCharacterFromModelCode = (code) => {
   )(code);
 };
 
-const createJsml = function (boardModel, userClick) {
+const createJsml = (boardModel, userClick) => {
   const ROW_AND_COLUMN_COUNT = Math.pow(R.length(boardModel), 0.5);
 
   const center = {
@@ -22,14 +22,14 @@ const createJsml = function (boardModel, userClick) {
     children: {
       tag: "tr",
       count: ROW_AND_COLUMN_COUNT,
-      children: function (trCount) {
+      children: (trCount) => {
         return {
           tag: "td",
           count: ROW_AND_COLUMN_COUNT,
-          text: (tdCount) => getCharacterFromModelCode(boardModel[trCount * ROW_AND_COLUMN_COUNT + tdCount]),
-          callback: function (element, parentEl, tdCount) {
-            element.onclick = () => userClick(trCount * ROW_AND_COLUMN_COUNT + tdCount);
-          }
+          text: (tdCount) =>
+            getCharacterFromModelCode(boardModel[R.add(R.multiply(trCount, ROW_AND_COLUMN_COUNT), tdCount)]),
+          callback: (element, parentEl, tdCount) =>
+            element.onclick = () => userClick(R.add(R.multiply(trCount, ROW_AND_COLUMN_COUNT), tdCount))
         };
       }
     }

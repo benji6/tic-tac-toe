@@ -1,6 +1,6 @@
 const jsmlParse = require('jsml-parse');
 
-const createJsml = function (text = '') {
+const createJsml = (text = '') => {
   return {
     tag: "div",
     className: "center",
