@@ -1,5 +1,5 @@
-const renderBoardView = require('./renderBoardView.js');
-const messageView = require('./messageView.js');
+const renderBoard = require('./renderBoard');
+const renderMessage = require('./renderMessage.js');
 const R = require('ramda');
 
 const Y = f => (x => f(v => x(x)(v)))(x => f(v => x(x)(v)));
@@ -47,20 +47,20 @@ const isVictory = (boardModel) => R.any(isThreeInARow, R.concat(R.concat(getRows
   getColumns(boardModel)),
   getDiagonals(boardModel)));
 
-module.exports = Y((recurse) => (boardModel) => {
-  const onClick = (index) => R.ifElse(
-    isValidMove(boardModel),
-    (index) => recurse(R.mapIndexed((element, idx) =>
-      R.eq(index, idx) ?
-      computePlayerTurn(boardModel) :
-      boardModel[idx], R.range(0, R.length(boardModel)))),
-    R.F
-  )(index);
+const onClick = (boardModel, recurse) => (index) => R.ifElse(
+  isValidMove(boardModel),
+  (index) => recurse(R.mapIndexed((element, idx) =>
+    R.eq(index, idx) ?
+    computePlayerTurn(boardModel) :
+    boardModel[idx], R.range(0, R.length(boardModel)))),
+  R.F
+)(index);
 
-  renderBoardView(boardModel, onClick);
+module.exports = Y((recurse) => (boardModel) => {
+  renderBoard(getRows(boardModel), onClick(boardModel, recurse));
 
   R.cond(
-    [isVictory, (boardModel) => messageView.renderVictoryMessage(equalsOne(computeLastPlayerTurn(boardModel)) ? "noughts" : "crosses")],
-    [boardIsFull, messageView.renderDrawMessage]
+    [isVictory, (boardModel) => renderMessage.victory(equalsOne(computeLastPlayerTurn(boardModel)) ? "noughts" : "crosses")],
+    [boardIsFull, renderMessage.draw]
   )(boardModel);
 });

@@ -1,5 +1,5 @@
 # Tic-Tac-Toe
-Just playing around with ramda, es6, functional programming etc.
+Just playing around with ramda, es6, virtual-dom, functional programming etc.
 
 Only runs in Firefox at time of writing.
 

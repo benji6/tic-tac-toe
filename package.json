@@ -29,7 +29,6 @@
     "watchify": "^2.5.0"
   },
   "dependencies": {
-    "jsml-parse": "^2.0.0",
     "ramda": "^0.13.0"
   }
 }
