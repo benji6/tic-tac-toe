@@ -2,14 +2,11 @@ const jsmlParse = require('jsml-parse');
 const R = require('ramda');
 
 const getCharacterFromModelCode = (code) => {
-  switch (code) {
-    case 0:
-      return '';
-    case 1:
-      return 'O';
-    case 2:
-      return 'X';
-  }
+  return R.cond(
+    [R.eq(0), R.always('')],
+    [R.eq(1), R.always('O')],
+    [R.eq(2), R.always('X')]
+  )(code);
 };
 
 const createJsml = function (boardModel, userClick) {
@@ -45,9 +42,7 @@ module.exports = function (boardModel, userClick) {
   const parentDomEl = document.getElementById('board_container');
   const domStructure = jsmlParse(createJsml(boardModel, userClick));
 
-  while (parentDomEl.children.length) {
-    parentDomEl.removeChild(parentDomEl.children[0]);
-  }
+  R.forEach((child) => parentDomEl.removeChild(child), parentDomEl.children);
 
   parentDomEl.appendChild(domStructure);
 };

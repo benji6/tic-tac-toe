@@ -9,7 +9,7 @@ const renderBoardView = require('./renderBoardView.js');
 const renderMessageView = require('./renderMessageView.js');
 const R = require('ramda');
 
-const Y = (f) => (x => f(v => x(x)(v)))(x => f(v => x(x)(v)));
+const Y = f => (x => f(v => x(x)(v)))(x => f(v => x(x)(v)));
 
 const filteredLength = R.compose(R.length, R.filter);
 const equalsZero = R.eq(0);
@@ -95,21 +95,18 @@ module.exports = Y((recurse) => (boardModel) => {
 },{"./renderBoardView.js":4,"./renderMessageView.js":5,"ramda":10}],3:[function(require,module,exports){
 const R = require('ramda');
 
-module.exports = () => R.map(R.multiply(0), R.range(0, 9));
+module.exports = () => R.map(R.always(0), R.range(0, 9));
 
 },{"ramda":10}],4:[function(require,module,exports){
 const jsmlParse = require('jsml-parse');
 const R = require('ramda');
 
 const getCharacterFromModelCode = (code) => {
-  switch (code) {
-    case 0:
-      return '';
-    case 1:
-      return 'O';
-    case 2:
-      return 'X';
-  }
+  return R.cond(
+    [R.eq(0), R.always('')],
+    [R.eq(1), R.always('O')],
+    [R.eq(2), R.always('X')]
+  )(code);
 };
 
 const createJsml = function (boardModel, userClick) {
@@ -145,9 +142,7 @@ module.exports = function (boardModel, userClick) {
   const parentDomEl = document.getElementById('board_container');
   const domStructure = jsmlParse(createJsml(boardModel, userClick));
 
-  while (parentDomEl.children.length) {
-    parentDomEl.removeChild(parentDomEl.children[0]);
-  }
+  R.forEach((child) => parentDomEl.removeChild(child), parentDomEl.children);
 
   parentDomEl.appendChild(domStructure);
 };

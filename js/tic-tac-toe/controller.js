@@ -2,7 +2,7 @@ const renderBoardView = require('./renderBoardView.js');
 const renderMessageView = require('./renderMessageView.js');
 const R = require('ramda');
 
-const Y = (f) => (x => f(v => x(x)(v)))(x => f(v => x(x)(v)));
+const Y = f => (x => f(v => x(x)(v)))(x => f(v => x(x)(v)));
 
 const filteredLength = R.compose(R.length, R.filter);
 const equalsZero = R.eq(0);
