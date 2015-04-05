@@ -1,5 +1,10 @@
-const R = require('ramda');
-
+const m = require('mori');
 const TicTacToe = require('./tic-tac-toe/controller.js');
 
-TicTacToe(R.repeat(0, 9));
+const e = 0;
+
+TicTacToe(m.vector(
+  m.vector(e, e, e),
+  m.vector(e, e, e),
+  m.vector(e, e, e)
+));

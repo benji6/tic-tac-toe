@@ -1,34 +1,32 @@
 const m = require('mori');
 const R = require('ramda');
 
-const equalsZero = m.curry(m.equals, 0);
-const equalsOne = m.curry(m.equals, 1);
-const equalsTwo = m.curry(m.equals, 2);
+const equalsZero = R.eq(0);
+const equalsOne = R.eq(1);
+const equalsTwo = R.eq(2);
 
-module.exports = () => {
-  const e = 0;
-  const sideLength = 3;
-  const model = m.vector(
-    m.vector(e, e, e),
-    m.vector(e, e, e),
-    m.vector(e, e, e)
-  );
+module.exports = (model) => {
+  const countOfCellsWhere = m.comp(m.count, R.curry(R.flip(R.binary(m.filter)))(m.flatten(model)));
+  const computePlayerTurn = () => R.ifElse(m.curry(R.eq, countOfCellsWhere(equalsOne)), R.always(1), R.always(2))(countOfCellsWhere(equalsTwo));
+  const computeLastPlayerTurn = () => R.ifElse(m.compose(equalsOne(computePlayerTurn)), R.always(2), R.always(1))();
 
-  const boardIsFull = () => equalsZero(m.count(m.filter(equalsZero, model)));
+  const boardIsFull = () => equalsZero(filteredLength(equalsZero));
   const getRows = () => m.intoArray(m.map(m.intoArray, model));
 
-  const getColumnFromIndex = (index) => R.modulo(index, sideLength);
-  const getRowFromIndex = (index) => Math.floor(R.divide(index, sideLength));
+  const getColumnFromIndex = (index) => R.modulo(index, m.count(model));
+  const getRowFromIndex = (index) => Math.floor(R.divide(index, m.count(model)));
 
-  isValidMove = (index) => equalsZero(m.nth(m.nth(model, getRowFromIndex(index)), getColumnFromIndex(index)));
+  const isValidMove = (index) => equalsZero(m.nth(m.nth(model, getRowFromIndex(index)), getColumnFromIndex(index)));
 
-
-
-
+  const computeNewModel = (index, value) =>
+   m.updateIn(model, [getRowFromIndex(index)], R.always(m.updateIn(m.nth(model, getRowFromIndex(index)), [getColumnFromIndex(index)], R.always(value))));
 
   return {
     boardIsFull,
+    computeNewModel,
+    computePlayerTurn,
     getRows,
     isValidMove
   };
+
 };
