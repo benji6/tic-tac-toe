@@ -1,8 +1,13 @@
+const m = require('mori');
+const R = require('ramda');
+const createModel = require('./createModel.js');
 const renderBoard = require('./renderBoard');
 const renderMessage = require('./renderMessage.js');
-const R = require('ramda');
+const Y = require('./Y.js');
 
-const Y = f => (x => f(v => x(x)(v)))(x => f(v => x(x)(v)));
+
+const model = createModel();
+
 
 const filteredLength = R.compose(R.length, R.filter);
 const equalsZero = R.eq(0);
@@ -57,7 +62,7 @@ const onClick = (boardModel, recurse) => (index) => R.ifElse(
 )(index);
 
 module.exports = Y((recurse) => (boardModel) => {
-  renderBoard(getRows(boardModel), onClick(boardModel, recurse));
+  renderBoard(model.getRows(), (index) => console.log(model.isValidMove(index)));
 
   R.cond(
     [isVictory, (boardModel) => renderMessage.victory(equalsOne(computeLastPlayerTurn(boardModel)) ? "noughts" : "crosses")],
