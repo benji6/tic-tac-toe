@@ -18,25 +18,30 @@ const equalsTwo = R.eq(2);
 //   boardModel[value], diagonals), getDiagonalsIndices(boardModel));
 // const isGameOver = (boardModel) => R.or(isVictory(boardModel), boardIsFull(boardModel));
 
-// const isValidMove = R.curry((boardModel, index) =>
-//   R.and(equalsZero(boardModel[index]), R.not(isGameOver(boardModel))));
-
-
 
 module.exports = (model) => {
   const countOfCellsWhere = m.comp(m.count, R.curry(R.flip(R.binary(m.filter)))(m.flatten(model)));
   const computePlayerTurn = () => R.ifElse(m.curry(R.eq, countOfCellsWhere(equalsOne)), R.always(1), R.always(2))(countOfCellsWhere(equalsTwo));
-  const computeLastPlayerTurn = R.ifElse(m.comp(equalsOne, computePlayerTurn), R.always(2), R.always(1));
-console.log(computeLastPlayerTurn()()()()()());
+  const computeLastPlayerTurn = () => equalsOne(computePlayerTurn()) ? 2 : 1;
   const boardIsFull = () => equalsZero(filteredLength(equalsZero));
+  const getColumns = () => m.map((row) => m.nth(row, 0), model);
+
+  console.log((String(getColumns())));
+
+  //remove this monstrosity!
   const getRows = () => m.intoArray(m.map(m.intoArray, model));
 
   const getColumnFromIndex = (index) => R.modulo(index, m.count(model));
   const getRowFromIndex = (index) => Math.floor(R.divide(index, m.count(model)));
   const isThreeInARow = (line) => R.or(m.every(equalsOne, line), m.every(equalsTwo, line));
-  const isValidMove = (index) => equalsZero(m.nth(m.nth(model, getRowFromIndex(index)), getColumnFromIndex(index)));
 
-  const isVictory = () => m.some(isThreeInARow, model);
+  //fix this and not valid move if isVictory is true
+  const isValidMove = (index) => R.both(
+    (index) => equalsZero(m.nth(m.nth(model, getRowFromIndex(index)), getColumnFromIndex(index))),
+    m.comp(R.not, isVictory)
+  )(index);
+
+  const isVictory = () => m.some(isThreeInARow, m.conj(model, getColumns()));
   // R.any(isThreeInARow, R.concat(R.concat(getRows(boardModel),
   //   getColumns(boardModel)),
   //   getDiagonals(boardModel)));
