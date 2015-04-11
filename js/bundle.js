@@ -13,7 +13,7 @@ const R = require('ramda');
 const Y = f => (x => f(v => x(x)(v)))(x => f(v => x(x)(v)));
 
 const filteredLength = R.compose(R.length, R.filter);
-const equalsZero = R.eq(0);
+const equalsZero = tic_tac_toe.core.equalsZero;
 const equalsOne = R.eq(1);
 const equalsTwo = R.eq(2);
 

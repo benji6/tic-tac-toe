@@ -4,6 +4,7 @@
   "description": "",
   "main": "js/main.js",
   "scripts": {
+    "dev": "java -cp cljs.jar:src clojure.main watch.clj",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
