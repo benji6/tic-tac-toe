@@ -5,7 +5,7 @@ const TicTacToe = require('./tic-tac-toe/controller.js');
 
 TicTacToe(R.repeat(0, 9));
 
-},{"./tic-tac-toe/controller.js":2,"ramda":6}],2:[function(require,module,exports){
+},{"./tic-tac-toe/controller.js":2,"ramda":12}],2:[function(require,module,exports){
 const renderBoard = require('./renderBoard');
 const renderMessage = require('./renderMessage.js');
 const R = require('ramda');
@@ -73,7 +73,7 @@ module.exports = Y((recurse) => (boardModel) => {
   )(boardModel);
 });
 
-},{"./renderBoard":3,"./renderMessage.js":4,"ramda":6}],3:[function(require,module,exports){
+},{"./renderBoard":3,"./renderMessage.js":4,"ramda":12}],3:[function(require,module,exports){
 const R = require('ramda');
 const h = require('virtual-dom/h');
 const diff = require('virtual-dom/diff');
@@ -114,7 +114,7 @@ module.exports = (rows, onclick) => {
   )(domRoot);
 };
 
-},{"ramda":6,"virtual-dom/create-element":7,"virtual-dom/diff":8,"virtual-dom/h":9,"virtual-dom/patch":17}],4:[function(require,module,exports){
+},{"ramda":12,"virtual-dom/create-element":13,"virtual-dom/diff":14,"virtual-dom/h":15,"virtual-dom/patch":16}],4:[function(require,module,exports){
 const R = require('ramda');
 const h = require('virtual-dom/h');
 const createElement = require('virtual-dom/create-element');
@@ -132,9 +132,212 @@ module.exports = {
   victory
 };
 
-},{"ramda":6,"virtual-dom/create-element":7,"virtual-dom/h":9}],5:[function(require,module,exports){
+},{"ramda":12,"virtual-dom/create-element":13,"virtual-dom/h":15}],5:[function(require,module,exports){
 
 },{}],6:[function(require,module,exports){
+/*!
+ * Cross-Browser Split 1.1.1
+ * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
+ * Available under the MIT License
+ * ECMAScript compliant, uniform cross-browser split method
+ */
+
+/**
+ * Splits a string into an array of strings using a regex or string separator. Matches of the
+ * separator are not included in the result array. However, if `separator` is a regex that contains
+ * capturing groups, backreferences are spliced into the result each time `separator` is matched.
+ * Fixes browser bugs compared to the native `String.prototype.split` and can be used reliably
+ * cross-browser.
+ * @param {String} str String to split.
+ * @param {RegExp|String} separator Regex or string to use for separating the string.
+ * @param {Number} [limit] Maximum number of items to include in the result array.
+ * @returns {Array} Array of substrings.
+ * @example
+ *
+ * // Basic use
+ * split('a b c d', ' ');
+ * // -> ['a', 'b', 'c', 'd']
+ *
+ * // With limit
+ * split('a b c d', ' ', 2);
+ * // -> ['a', 'b']
+ *
+ * // Backreferences in result array
+ * split('..word1 word2..', /([a-z]+)(\d+)/i);
+ * // -> ['..', 'word', '1', ' ', 'word', '2', '..']
+ */
+module.exports = (function split(undef) {
+
+  var nativeSplit = String.prototype.split,
+    compliantExecNpcg = /()??/.exec("")[1] === undef,
+    // NPCG: nonparticipating capturing group
+    self;
+
+  self = function(str, separator, limit) {
+    // If `separator` is not a regex, use `nativeSplit`
+    if (Object.prototype.toString.call(separator) !== "[object RegExp]") {
+      return nativeSplit.call(str, separator, limit);
+    }
+    var output = [],
+      flags = (separator.ignoreCase ? "i" : "") + (separator.multiline ? "m" : "") + (separator.extended ? "x" : "") + // Proposed for ES6
+      (separator.sticky ? "y" : ""),
+      // Firefox 3+
+      lastLastIndex = 0,
+      // Make `global` and avoid `lastIndex` issues by working with a copy
+      separator = new RegExp(separator.source, flags + "g"),
+      separator2, match, lastIndex, lastLength;
+    str += ""; // Type-convert
+    if (!compliantExecNpcg) {
+      // Doesn't need flags gy, but they don't hurt
+      separator2 = new RegExp("^" + separator.source + "$(?!\\s)", flags);
+    }
+    /* Values for `limit`, per the spec:
+     * If undefined: 4294967295 // Math.pow(2, 32) - 1
+     * If 0, Infinity, or NaN: 0
+     * If positive number: limit = Math.floor(limit); if (limit > 4294967295) limit -= 4294967296;
+     * If negative number: 4294967296 - Math.floor(Math.abs(limit))
+     * If other: Type-convert, then use the above rules
+     */
+    limit = limit === undef ? -1 >>> 0 : // Math.pow(2, 32) - 1
+    limit >>> 0; // ToUint32(limit)
+    while (match = separator.exec(str)) {
+      // `separator.lastIndex` is not reliable cross-browser
+      lastIndex = match.index + match[0].length;
+      if (lastIndex > lastLastIndex) {
+        output.push(str.slice(lastLastIndex, match.index));
+        // Fix browsers whose `exec` methods don't consistently return `undefined` for
+        // nonparticipating capturing groups
+        if (!compliantExecNpcg && match.length > 1) {
+          match[0].replace(separator2, function() {
+            for (var i = 1; i < arguments.length - 2; i++) {
+              if (arguments[i] === undef) {
+                match[i] = undef;
+              }
+            }
+          });
+        }
+        if (match.length > 1 && match.index < str.length) {
+          Array.prototype.push.apply(output, match.slice(1));
+        }
+        lastLength = match[0].length;
+        lastLastIndex = lastIndex;
+        if (output.length >= limit) {
+          break;
+        }
+      }
+      if (separator.lastIndex === match.index) {
+        separator.lastIndex++; // Avoid an infinite loop
+      }
+    }
+    if (lastLastIndex === str.length) {
+      if (lastLength || !separator.test("")) {
+        output.push("");
+      }
+    } else {
+      output.push(str.slice(lastLastIndex));
+    }
+    return output.length > limit ? output.slice(0, limit) : output;
+  };
+
+  return self;
+})();
+
+},{}],7:[function(require,module,exports){
+'use strict';
+
+var OneVersionConstraint = require('individual/one-version');
+
+var MY_VERSION = '7';
+OneVersionConstraint('ev-store', MY_VERSION);
+
+var hashKey = '__EV_STORE_KEY@' + MY_VERSION;
+
+module.exports = EvStore;
+
+function EvStore(elem) {
+    var hash = elem[hashKey];
+
+    if (!hash) {
+        hash = elem[hashKey] = {};
+    }
+
+    return hash;
+}
+
+},{"individual/one-version":10}],8:[function(require,module,exports){
+(function (global){
+var topLevel = typeof global !== 'undefined' ? global :
+    typeof window !== 'undefined' ? window : {}
+var minDoc = require('min-document');
+
+if (typeof document !== 'undefined') {
+    module.exports = document;
+} else {
+    var doccy = topLevel['__GLOBAL_DOCUMENT_CACHE@4'];
+
+    if (!doccy) {
+        doccy = topLevel['__GLOBAL_DOCUMENT_CACHE@4'] = minDoc;
+    }
+
+    module.exports = doccy;
+}
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"min-document":5}],9:[function(require,module,exports){
+(function (global){
+'use strict';
+
+/*global window, global*/
+
+var root = typeof window !== 'undefined' ?
+    window : typeof global !== 'undefined' ?
+    global : {};
+
+module.exports = Individual;
+
+function Individual(key, value) {
+    if (key in root) {
+        return root[key];
+    }
+
+    root[key] = value;
+
+    return value;
+}
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],10:[function(require,module,exports){
+'use strict';
+
+var Individual = require('./index.js');
+
+module.exports = OneVersion;
+
+function OneVersion(moduleName, version, defaultValue) {
+    var key = '__INDIVIDUAL_ONE_VERSION_' + moduleName;
+    var enforceKey = key + '_ENFORCE_SINGLETON';
+
+    var versionValue = Individual(enforceKey, version);
+
+    if (versionValue !== version) {
+        throw new Error('Can only have one copy of ' +
+            moduleName + '.\n' +
+            'You already have version ' + versionValue +
+            ' installed.\n' +
+            'This means you cannot install version ' + version);
+    }
+
+    return Individual(key, defaultValue);
+}
+
+},{"./index.js":9}],11:[function(require,module,exports){
+"use strict";
+
+module.exports = function isObject(x) {
+	return typeof x === "object" && x !== null;
+};
+
+},{}],12:[function(require,module,exports){
 //  Ramda v0.13.0
 //  https://github.com/ramda/ramda
 //  (c) 2013-2015 Scott Sauyet, Michael Hurley, and David Chambers
@@ -7298,240 +7501,27 @@ module.exports = {
 
 }.call(this));
 
-},{}],7:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var createElement = require("./vdom/create-element.js")
 
 module.exports = createElement
 
-},{"./vdom/create-element.js":19}],8:[function(require,module,exports){
+},{"./vdom/create-element.js":18}],14:[function(require,module,exports){
 var diff = require("./vtree/diff.js")
 
 module.exports = diff
 
-},{"./vtree/diff.js":39}],9:[function(require,module,exports){
+},{"./vtree/diff.js":38}],15:[function(require,module,exports){
 var h = require("./virtual-hyperscript/index.js")
 
 module.exports = h
 
-},{"./virtual-hyperscript/index.js":26}],10:[function(require,module,exports){
-/*!
- * Cross-Browser Split 1.1.1
- * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
- * Available under the MIT License
- * ECMAScript compliant, uniform cross-browser split method
- */
-
-/**
- * Splits a string into an array of strings using a regex or string separator. Matches of the
- * separator are not included in the result array. However, if `separator` is a regex that contains
- * capturing groups, backreferences are spliced into the result each time `separator` is matched.
- * Fixes browser bugs compared to the native `String.prototype.split` and can be used reliably
- * cross-browser.
- * @param {String} str String to split.
- * @param {RegExp|String} separator Regex or string to use for separating the string.
- * @param {Number} [limit] Maximum number of items to include in the result array.
- * @returns {Array} Array of substrings.
- * @example
- *
- * // Basic use
- * split('a b c d', ' ');
- * // -> ['a', 'b', 'c', 'd']
- *
- * // With limit
- * split('a b c d', ' ', 2);
- * // -> ['a', 'b']
- *
- * // Backreferences in result array
- * split('..word1 word2..', /([a-z]+)(\d+)/i);
- * // -> ['..', 'word', '1', ' ', 'word', '2', '..']
- */
-module.exports = (function split(undef) {
-
-  var nativeSplit = String.prototype.split,
-    compliantExecNpcg = /()??/.exec("")[1] === undef,
-    // NPCG: nonparticipating capturing group
-    self;
-
-  self = function(str, separator, limit) {
-    // If `separator` is not a regex, use `nativeSplit`
-    if (Object.prototype.toString.call(separator) !== "[object RegExp]") {
-      return nativeSplit.call(str, separator, limit);
-    }
-    var output = [],
-      flags = (separator.ignoreCase ? "i" : "") + (separator.multiline ? "m" : "") + (separator.extended ? "x" : "") + // Proposed for ES6
-      (separator.sticky ? "y" : ""),
-      // Firefox 3+
-      lastLastIndex = 0,
-      // Make `global` and avoid `lastIndex` issues by working with a copy
-      separator = new RegExp(separator.source, flags + "g"),
-      separator2, match, lastIndex, lastLength;
-    str += ""; // Type-convert
-    if (!compliantExecNpcg) {
-      // Doesn't need flags gy, but they don't hurt
-      separator2 = new RegExp("^" + separator.source + "$(?!\\s)", flags);
-    }
-    /* Values for `limit`, per the spec:
-     * If undefined: 4294967295 // Math.pow(2, 32) - 1
-     * If 0, Infinity, or NaN: 0
-     * If positive number: limit = Math.floor(limit); if (limit > 4294967295) limit -= 4294967296;
-     * If negative number: 4294967296 - Math.floor(Math.abs(limit))
-     * If other: Type-convert, then use the above rules
-     */
-    limit = limit === undef ? -1 >>> 0 : // Math.pow(2, 32) - 1
-    limit >>> 0; // ToUint32(limit)
-    while (match = separator.exec(str)) {
-      // `separator.lastIndex` is not reliable cross-browser
-      lastIndex = match.index + match[0].length;
-      if (lastIndex > lastLastIndex) {
-        output.push(str.slice(lastLastIndex, match.index));
-        // Fix browsers whose `exec` methods don't consistently return `undefined` for
-        // nonparticipating capturing groups
-        if (!compliantExecNpcg && match.length > 1) {
-          match[0].replace(separator2, function() {
-            for (var i = 1; i < arguments.length - 2; i++) {
-              if (arguments[i] === undef) {
-                match[i] = undef;
-              }
-            }
-          });
-        }
-        if (match.length > 1 && match.index < str.length) {
-          Array.prototype.push.apply(output, match.slice(1));
-        }
-        lastLength = match[0].length;
-        lastLastIndex = lastIndex;
-        if (output.length >= limit) {
-          break;
-        }
-      }
-      if (separator.lastIndex === match.index) {
-        separator.lastIndex++; // Avoid an infinite loop
-      }
-    }
-    if (lastLastIndex === str.length) {
-      if (lastLength || !separator.test("")) {
-        output.push("");
-      }
-    } else {
-      output.push(str.slice(lastLastIndex));
-    }
-    return output.length > limit ? output.slice(0, limit) : output;
-  };
-
-  return self;
-})();
-
-},{}],11:[function(require,module,exports){
-'use strict';
-
-var OneVersionConstraint = require('individual/one-version');
-
-var MY_VERSION = '7';
-OneVersionConstraint('ev-store', MY_VERSION);
-
-var hashKey = '__EV_STORE_KEY@' + MY_VERSION;
-
-module.exports = EvStore;
-
-function EvStore(elem) {
-    var hash = elem[hashKey];
-
-    if (!hash) {
-        hash = elem[hashKey] = {};
-    }
-
-    return hash;
-}
-
-},{"individual/one-version":13}],12:[function(require,module,exports){
-(function (global){
-'use strict';
-
-/*global window, global*/
-
-var root = typeof window !== 'undefined' ?
-    window : typeof global !== 'undefined' ?
-    global : {};
-
-module.exports = Individual;
-
-function Individual(key, value) {
-    if (key in root) {
-        return root[key];
-    }
-
-    root[key] = value;
-
-    return value;
-}
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],13:[function(require,module,exports){
-'use strict';
-
-var Individual = require('./index.js');
-
-module.exports = OneVersion;
-
-function OneVersion(moduleName, version, defaultValue) {
-    var key = '__INDIVIDUAL_ONE_VERSION_' + moduleName;
-    var enforceKey = key + '_ENFORCE_SINGLETON';
-
-    var versionValue = Individual(enforceKey, version);
-
-    if (versionValue !== version) {
-        throw new Error('Can only have one copy of ' +
-            moduleName + '.\n' +
-            'You already have version ' + versionValue +
-            ' installed.\n' +
-            'This means you cannot install version ' + version);
-    }
-
-    return Individual(key, defaultValue);
-}
-
-},{"./index.js":12}],14:[function(require,module,exports){
-(function (global){
-var topLevel = typeof global !== 'undefined' ? global :
-    typeof window !== 'undefined' ? window : {}
-var minDoc = require('min-document');
-
-if (typeof document !== 'undefined') {
-    module.exports = document;
-} else {
-    var doccy = topLevel['__GLOBAL_DOCUMENT_CACHE@4'];
-
-    if (!doccy) {
-        doccy = topLevel['__GLOBAL_DOCUMENT_CACHE@4'] = minDoc;
-    }
-
-    module.exports = doccy;
-}
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"min-document":5}],15:[function(require,module,exports){
-"use strict";
-
-module.exports = function isObject(x) {
-	return typeof x === "object" && x !== null;
-};
-
-},{}],16:[function(require,module,exports){
-var nativeIsArray = Array.isArray
-var toString = Object.prototype.toString
-
-module.exports = nativeIsArray || isArray
-
-function isArray(obj) {
-    return toString.call(obj) === "[object Array]"
-}
-
-},{}],17:[function(require,module,exports){
+},{"./virtual-hyperscript/index.js":25}],16:[function(require,module,exports){
 var patch = require("./vdom/patch.js")
 
 module.exports = patch
 
-},{"./vdom/patch.js":22}],18:[function(require,module,exports){
+},{"./vdom/patch.js":21}],17:[function(require,module,exports){
 var isObject = require("is-object")
 var isHook = require("../vnode/is-vhook.js")
 
@@ -7630,7 +7620,7 @@ function getPrototype(value) {
     }
 }
 
-},{"../vnode/is-vhook.js":30,"is-object":15}],19:[function(require,module,exports){
+},{"../vnode/is-vhook.js":29,"is-object":11}],18:[function(require,module,exports){
 var document = require("global/document")
 
 var applyProperties = require("./apply-properties")
@@ -7678,7 +7668,7 @@ function createElement(vnode, opts) {
     return node
 }
 
-},{"../vnode/handle-thunk.js":28,"../vnode/is-vnode.js":31,"../vnode/is-vtext.js":32,"../vnode/is-widget.js":33,"./apply-properties":18,"global/document":14}],20:[function(require,module,exports){
+},{"../vnode/handle-thunk.js":27,"../vnode/is-vnode.js":30,"../vnode/is-vtext.js":31,"../vnode/is-widget.js":32,"./apply-properties":17,"global/document":8}],19:[function(require,module,exports){
 // Maps a virtual DOM tree onto a real DOM tree in an efficient manner.
 // We don't want to read all of the DOM nodes in the tree so we use
 // the in-order tree indexing to eliminate recursion down certain branches.
@@ -7765,13 +7755,12 @@ function ascending(a, b) {
     return a > b ? 1 : -1
 }
 
-},{}],21:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var applyProperties = require("./apply-properties")
 
 var isWidget = require("../vnode/is-widget.js")
 var VPatch = require("../vnode/vpatch.js")
 
-var render = require("./create-element")
 var updateWidget = require("./update-widget")
 
 module.exports = applyPatch
@@ -7819,7 +7808,7 @@ function removeNode(domNode, vNode) {
 }
 
 function insertNode(parentNode, vNode, renderOptions) {
-    var newNode = render(vNode, renderOptions)
+    var newNode = renderOptions.render(vNode, renderOptions)
 
     if (parentNode) {
         parentNode.appendChild(newNode)
@@ -7836,7 +7825,7 @@ function stringPatch(domNode, leftVNode, vText, renderOptions) {
         newNode = domNode
     } else {
         var parentNode = domNode.parentNode
-        newNode = render(vText, renderOptions)
+        newNode = renderOptions.render(vText, renderOptions)
 
         if (parentNode && newNode !== domNode) {
             parentNode.replaceChild(newNode, domNode)
@@ -7853,7 +7842,7 @@ function widgetPatch(domNode, leftVNode, widget, renderOptions) {
     if (updating) {
         newNode = widget.update(leftVNode, domNode) || domNode
     } else {
-        newNode = render(widget, renderOptions)
+        newNode = renderOptions.render(widget, renderOptions)
     }
 
     var parentNode = domNode.parentNode
@@ -7871,7 +7860,7 @@ function widgetPatch(domNode, leftVNode, widget, renderOptions) {
 
 function vNodePatch(domNode, leftVNode, vNode, renderOptions) {
     var parentNode = domNode.parentNode
-    var newNode = render(vNode, renderOptions)
+    var newNode = renderOptions.render(vNode, renderOptions)
 
     if (parentNode && newNode !== domNode) {
         parentNode.replaceChild(newNode, domNode)
@@ -7919,16 +7908,23 @@ function replaceRoot(oldRoot, newRoot) {
     return newRoot;
 }
 
-},{"../vnode/is-widget.js":33,"../vnode/vpatch.js":36,"./apply-properties":18,"./create-element":19,"./update-widget":23}],22:[function(require,module,exports){
+},{"../vnode/is-widget.js":32,"../vnode/vpatch.js":35,"./apply-properties":17,"./update-widget":22}],21:[function(require,module,exports){
 var document = require("global/document")
 var isArray = require("x-is-array")
 
+var render = require("./create-element")
 var domIndex = require("./dom-index")
 var patchOp = require("./patch-op")
 module.exports = patch
 
-function patch(rootNode, patches) {
-    return patchRecursive(rootNode, patches)
+function patch(rootNode, patches, renderOptions) {
+    renderOptions = renderOptions || {}
+    renderOptions.patch = renderOptions.patch && renderOptions.patch !== patch
+        ? renderOptions.patch
+        : patchRecursive
+    renderOptions.render = renderOptions.render || render
+
+    return renderOptions.patch(rootNode, patches, renderOptions)
 }
 
 function patchRecursive(rootNode, patches, renderOptions) {
@@ -7941,11 +7937,8 @@ function patchRecursive(rootNode, patches, renderOptions) {
     var index = domIndex(rootNode, patches.a, indices)
     var ownerDocument = rootNode.ownerDocument
 
-    if (!renderOptions) {
-        renderOptions = { patch: patchRecursive }
-        if (ownerDocument !== document) {
-            renderOptions.document = ownerDocument
-        }
+    if (!renderOptions.document && ownerDocument !== document) {
+        renderOptions.document = ownerDocument
     }
 
     for (var i = 0; i < indices.length; i++) {
@@ -7997,7 +7990,7 @@ function patchIndices(patches) {
     return indices
 }
 
-},{"./dom-index":20,"./patch-op":21,"global/document":14,"x-is-array":16}],23:[function(require,module,exports){
+},{"./create-element":18,"./dom-index":19,"./patch-op":20,"global/document":8,"x-is-array":39}],22:[function(require,module,exports){
 var isWidget = require("../vnode/is-widget.js")
 
 module.exports = updateWidget
@@ -8014,7 +8007,7 @@ function updateWidget(a, b) {
     return false
 }
 
-},{"../vnode/is-widget.js":33}],24:[function(require,module,exports){
+},{"../vnode/is-widget.js":32}],23:[function(require,module,exports){
 'use strict';
 
 var EvStore = require('ev-store');
@@ -8043,7 +8036,7 @@ EvHook.prototype.unhook = function(node, propertyName) {
     es[propName] = undefined;
 };
 
-},{"ev-store":11}],25:[function(require,module,exports){
+},{"ev-store":7}],24:[function(require,module,exports){
 'use strict';
 
 module.exports = SoftSetHook;
@@ -8062,7 +8055,7 @@ SoftSetHook.prototype.hook = function (node, propertyName) {
     }
 };
 
-},{}],26:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 var isArray = require('x-is-array');
@@ -8128,6 +8121,8 @@ function h(tagName, properties, children) {
 function addChild(c, childNodes, tag, props) {
     if (typeof c === 'string') {
         childNodes.push(new VText(c));
+    } else if (typeof c === 'number') {
+        childNodes.push(new VText(String(c)));
     } else if (isChild(c)) {
         childNodes.push(c);
     } else if (isArray(c)) {
@@ -8199,12 +8194,12 @@ function errorString(obj) {
     }
 }
 
-},{"../vnode/is-thunk":29,"../vnode/is-vhook":30,"../vnode/is-vnode":31,"../vnode/is-vtext":32,"../vnode/is-widget":33,"../vnode/vnode.js":35,"../vnode/vtext.js":37,"./hooks/ev-hook.js":24,"./hooks/soft-set-hook.js":25,"./parse-tag.js":27,"x-is-array":16}],27:[function(require,module,exports){
+},{"../vnode/is-thunk":28,"../vnode/is-vhook":29,"../vnode/is-vnode":30,"../vnode/is-vtext":31,"../vnode/is-widget":32,"../vnode/vnode.js":34,"../vnode/vtext.js":36,"./hooks/ev-hook.js":23,"./hooks/soft-set-hook.js":24,"./parse-tag.js":26,"x-is-array":39}],26:[function(require,module,exports){
 'use strict';
 
 var split = require('browser-split');
 
-var classIdSplit = /([\.#]?[a-zA-Z0-9_:-]+)/;
+var classIdSplit = /([\.#]?[a-zA-Z0-9\u007F-\uFFFF_:-]+)/;
 var notClassId = /^\.|#/;
 
 module.exports = parseTag;
@@ -8255,7 +8250,7 @@ function parseTag(tag, props) {
     return props.namespace ? tagName : tagName.toUpperCase();
 }
 
-},{"browser-split":10}],28:[function(require,module,exports){
+},{"browser-split":6}],27:[function(require,module,exports){
 var isVNode = require("./is-vnode")
 var isVText = require("./is-vtext")
 var isWidget = require("./is-widget")
@@ -8297,14 +8292,14 @@ function renderThunk(thunk, previous) {
     return renderedThunk
 }
 
-},{"./is-thunk":29,"./is-vnode":31,"./is-vtext":32,"./is-widget":33}],29:[function(require,module,exports){
+},{"./is-thunk":28,"./is-vnode":30,"./is-vtext":31,"./is-widget":32}],28:[function(require,module,exports){
 module.exports = isThunk
 
 function isThunk(t) {
     return t && t.type === "Thunk"
 }
 
-},{}],30:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 module.exports = isHook
 
 function isHook(hook) {
@@ -8313,7 +8308,7 @@ function isHook(hook) {
        typeof hook.unhook === "function" && !hook.hasOwnProperty("unhook"))
 }
 
-},{}],31:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = isVirtualNode
@@ -8322,7 +8317,7 @@ function isVirtualNode(x) {
     return x && x.type === "VirtualNode" && x.version === version
 }
 
-},{"./version":34}],32:[function(require,module,exports){
+},{"./version":33}],31:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = isVirtualText
@@ -8331,17 +8326,17 @@ function isVirtualText(x) {
     return x && x.type === "VirtualText" && x.version === version
 }
 
-},{"./version":34}],33:[function(require,module,exports){
+},{"./version":33}],32:[function(require,module,exports){
 module.exports = isWidget
 
 function isWidget(w) {
     return w && w.type === "Widget"
 }
 
-},{}],34:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 module.exports = "2"
 
-},{}],35:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 var version = require("./version")
 var isVNode = require("./is-vnode")
 var isWidget = require("./is-widget")
@@ -8415,7 +8410,7 @@ function VirtualNode(tagName, properties, children, key, namespace) {
 VirtualNode.prototype.version = version
 VirtualNode.prototype.type = "VirtualNode"
 
-},{"./is-thunk":29,"./is-vhook":30,"./is-vnode":31,"./is-widget":33,"./version":34}],36:[function(require,module,exports){
+},{"./is-thunk":28,"./is-vhook":29,"./is-vnode":30,"./is-widget":32,"./version":33}],35:[function(require,module,exports){
 var version = require("./version")
 
 VirtualPatch.NONE = 0
@@ -8439,7 +8434,7 @@ function VirtualPatch(type, vNode, patch) {
 VirtualPatch.prototype.version = version
 VirtualPatch.prototype.type = "VirtualPatch"
 
-},{"./version":34}],37:[function(require,module,exports){
+},{"./version":33}],36:[function(require,module,exports){
 var version = require("./version")
 
 module.exports = VirtualText
@@ -8451,7 +8446,7 @@ function VirtualText(text) {
 VirtualText.prototype.version = version
 VirtualText.prototype.type = "VirtualText"
 
-},{"./version":34}],38:[function(require,module,exports){
+},{"./version":33}],37:[function(require,module,exports){
 var isObject = require("is-object")
 var isHook = require("../vnode/is-vhook")
 
@@ -8511,7 +8506,7 @@ function getPrototype(value) {
   }
 }
 
-},{"../vnode/is-vhook":30,"is-object":15}],39:[function(require,module,exports){
+},{"../vnode/is-vhook":29,"is-object":11}],38:[function(require,module,exports){
 var isArray = require("x-is-array")
 
 var VPatch = require("../vnode/vpatch")
@@ -8922,7 +8917,7 @@ function keyIndex(children) {
 
     return {
         keys: keys,     // A hash of key name to index
-        free: free,     // An array of unkeyed item indices
+        free: free      // An array of unkeyed item indices
     }
 }
 
@@ -8940,4 +8935,14 @@ function appendPatch(apply, patch) {
     }
 }
 
-},{"../vnode/handle-thunk":28,"../vnode/is-thunk":29,"../vnode/is-vnode":31,"../vnode/is-vtext":32,"../vnode/is-widget":33,"../vnode/vpatch":36,"./diff-props":38,"x-is-array":16}]},{},[1]);
+},{"../vnode/handle-thunk":27,"../vnode/is-thunk":28,"../vnode/is-vnode":30,"../vnode/is-vtext":31,"../vnode/is-widget":32,"../vnode/vpatch":35,"./diff-props":37,"x-is-array":39}],39:[function(require,module,exports){
+var nativeIsArray = Array.isArray
+var toString = Object.prototype.toString
+
+module.exports = nativeIsArray || isArray
+
+function isArray(obj) {
+    return toString.call(obj) === "[object Array]"
+}
+
+},{}]},{},[1]);

@@ -1,0 +1,37 @@
+body {
+  background-color: #030303;
+  color: #ace;
+  cursor: default;
+  font-family: sans-serif;
+  margin: 0;
+  user-select: none;
+}
+
+table {
+  display: inline-block;
+  border-radius: 2em;
+  box-shadow: 0em 0em 1em 0em #ace;
+  display: inline-block;
+  font-family: sans-serif;
+  padding: 1em;
+  margin: 4em;
+}
+
+td {
+  border-width: 1em;
+  box-shadow: 0em 0em 1em 0em #ace;
+  cursor: pointer;
+  font-size: 3rem;
+  height: 3rem;
+  text-align: center;
+  width: 3rem;
+}
+
+td:hover {
+  background: #79a;
+  text-shadow: 0 0 1em #cef;
+}
+
+.center {
+  text-align: center;
+}
