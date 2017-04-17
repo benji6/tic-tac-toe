@@ -7,17 +7,17 @@ const createElement = require('virtual-dom/create-element')
 const createRow = R.curry(h)('tr', R.__, undefined)
 const createCell = R.curry(h)('td', R.__, R.__)
 
-const createVirtualRoot = (rows, onclick) => h('div.center', [
-  h('table', R.mapIndexed((row, rowIndex) => createRow(R.mapIndexed((cell, cellIndex) => createCell({
-    onclick: () => onclick(R.add(R.multiply(rowIndex, R.length(row)), cellIndex)),
-  }, getCharacterFromModelCode(cell)), row)), rows)),
-])
-
 const getCharacterFromModelCode = code => R.cond(
   [R.eq(0), R.always('')],
   [R.eq(1), R.always('O')],
   [R.eq(2), R.always('X')]
 )(code)
+
+const createVirtualRoot = (rows, onclick) => h('div.center', [
+  h('table', R.mapIndexed((row, rowIndex) => createRow(R.mapIndexed((cell, cellIndex) => createCell({
+    onclick: () => onclick(R.add(R.multiply(rowIndex, R.length(row)), cellIndex)),
+  }, getCharacterFromModelCode(cell)), row)), rows)),
+])
 
 let virtualRoot = null
 let domRoot = null
