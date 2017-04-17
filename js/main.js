@@ -1,5 +1,5 @@
-const R = require('ramda');
+const R = require('ramda')
 
-const TicTacToe = require('./tic-tac-toe/controller.js');
+const TicTacToe = require('./tic-tac-toe/controller.js')
 
-TicTacToe(R.repeat(0, 9));
+TicTacToe(R.repeat(0, 9))

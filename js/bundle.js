@@ -1,138 +1,137 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-const R = require('ramda');
+const R = require('ramda')
 
-const TicTacToe = require('./tic-tac-toe/controller.js');
+const TicTacToe = require('./tic-tac-toe/controller.js')
 
-TicTacToe(R.repeat(0, 9));
+TicTacToe(R.repeat(0, 9))
 
 },{"./tic-tac-toe/controller.js":2,"ramda":12}],2:[function(require,module,exports){
-const renderBoard = require('./renderBoard');
-const renderMessage = require('./renderMessage.js');
-const R = require('ramda');
+const renderBoard = require('./renderBoard')
+const renderMessage = require('./renderMessage.js')
+const R = require('ramda')
 
-const Y = f => (x => f(v => x(x)(v)))(x => f(v => x(x)(v)));
+const Y = f => (x => f(v => x(x)(v)))(x => f(v => x(x)(v)))
 
-const filteredLength = R.compose(R.length, R.filter);
-const equalsZero = R.eq(0);
-const equalsOne = R.eq(1);
-const equalsTwo = R.eq(2);
+const filteredLength = R.compose(R.length, R.filter)
+const equalsZero = R.eq(0)
+const equalsOne = R.eq(1)
+const equalsTwo = R.eq(2)
 
-const boardIsFull = (boardModel) => R.not(filteredLength(equalsZero, boardModel));
+const boardIsFull = boardModel => R.not(filteredLength(equalsZero, boardModel))
 
-const computePlayerTurn = (boardModel) => R.eq(filteredLength(equalsTwo, boardModel),
-  filteredLength(equalsOne, boardModel)) ? 1 : 2;
+const computePlayerTurn = boardModel => R.eq(filteredLength(equalsTwo, boardModel),
+  filteredLength(equalsOne, boardModel)) ? 1 : 2
 
-const computeLastPlayerTurn = (boardModel) => equalsOne(computePlayerTurn(boardModel)) ? 2 : 1;
+const computeLastPlayerTurn = boardModel => equalsOne(computePlayerTurn(boardModel)) ? 2 : 1
 
-const computeRowAndColumnCount = (list) => Math.pow(R.length(list), 0.5);
+const computeRowAndColumnCount = list => Math.pow(R.length(list), 0.5)
 
-const getRows = (boardModel) => R.map((index) => R.rejectIndexed((cell, cellIndex) =>
-  Math.floor(R.subtract(R.divide(cellIndex, computeRowAndColumnCount(boardModel)), index)))(boardModel), R.range(0, computeRowAndColumnCount(boardModel)));
+const getRows = boardModel => R.map(index => R.rejectIndexed((cell, cellIndex) =>
+  Math.floor(R.subtract(R.divide(cellIndex, computeRowAndColumnCount(boardModel)), index)))(boardModel), R.range(0, computeRowAndColumnCount(boardModel)))
 
-const getColumns = (boardModel) => R.map((index) => R.rejectIndexed((cell, cellIndex) =>
-  R.mathMod(R.subtract(cellIndex, index), computeRowAndColumnCount(boardModel)))(boardModel), R.range(0, computeRowAndColumnCount(boardModel)));
+const getColumns = boardModel => R.map(index => R.rejectIndexed((cell, cellIndex) =>
+  R.mathMod(R.subtract(cellIndex, index), computeRowAndColumnCount(boardModel)))(boardModel), R.range(0, computeRowAndColumnCount(boardModel)))
 
-const getDiagonalsIndices = (boardModel) => R.concat(
-  [R.map((index) =>
+const getDiagonalsIndices = boardModel => R.concat(
+  [R.map(index =>
     R.multiply(index, R.add(computeRowAndColumnCount(boardModel), 1)), R.range(0, computeRowAndColumnCount(boardModel)))],
-  [R.map((index) =>
+  [R.map(index =>
     R.multiply(R.inc(index), R.subtract(computeRowAndColumnCount(boardModel), 1)), R.range(0, computeRowAndColumnCount(boardModel)))]
-);
+)
 
-const getDiagonals = (boardModel) =>
-  R.map((diagonals) =>
-  R.map((value) =>
-  boardModel[value], diagonals), getDiagonalsIndices(boardModel));
+const getDiagonals = boardModel =>
+  R.map(diagonals =>
+  R.map(value =>
+  boardModel[value], diagonals), getDiagonalsIndices(boardModel))
 
-const isGameOver = (boardModel) => R.or(isVictory(boardModel), boardIsFull(boardModel));
+const isGameOver = boardModel => R.or(isVictory(boardModel), boardIsFull(boardModel))
 
-const isThreeInARow = (line) => R.or(R.all(equalsOne, line), R.all(equalsTwo, line));
+const isThreeInARow = line => R.or(R.all(equalsOne, line), R.all(equalsTwo, line))
 
 const isValidMove = R.curry((boardModel, index) =>
-  R.and(equalsZero(boardModel[index]), R.not(isGameOver(boardModel))));
+  R.and(equalsZero(boardModel[index]), R.not(isGameOver(boardModel))))
 
-const isVictory = (boardModel) => R.any(isThreeInARow, R.concat(R.concat(getRows(boardModel),
+const isVictory = boardModel => R.any(isThreeInARow, R.concat(R.concat(getRows(boardModel),
   getColumns(boardModel)),
-  getDiagonals(boardModel)));
+  getDiagonals(boardModel)))
 
-const onClick = (boardModel, recurse) => (index) => R.ifElse(
+const onClick = (boardModel, recurse) => index => R.ifElse(
   isValidMove(boardModel),
-  (index) => recurse(R.mapIndexed((element, idx) =>
-    R.eq(index, idx) ?
-    computePlayerTurn(boardModel) :
-    boardModel[idx], R.range(0, R.length(boardModel)))),
+  index => recurse(R.mapIndexed((element, idx) =>
+    R.eq(index, idx)
+    ? computePlayerTurn(boardModel)
+    : boardModel[idx], R.range(0, R.length(boardModel)))),
   R.F
-)(index);
+)(index)
 
-module.exports = Y((recurse) => (boardModel) => {
-  renderBoard(getRows(boardModel), onClick(boardModel, recurse));
+module.exports = Y(recurse => boardModel => {
+  renderBoard(getRows(boardModel), onClick(boardModel, recurse))
 
   R.cond(
-    [isVictory, (boardModel) => renderMessage.victory(equalsOne(computeLastPlayerTurn(boardModel)) ? "noughts" : "crosses")],
+    [isVictory, boardModel => renderMessage.victory(equalsOne(computeLastPlayerTurn(boardModel)) ? 'noughts' : 'crosses')],
     [boardIsFull, renderMessage.draw]
-  )(boardModel);
-});
+  )(boardModel)
+})
 
 },{"./renderBoard":3,"./renderMessage.js":4,"ramda":12}],3:[function(require,module,exports){
-const R = require('ramda');
-const h = require('virtual-dom/h');
-const diff = require('virtual-dom/diff');
-const patch = require('virtual-dom/patch');
-const createElement = require('virtual-dom/create-element');
+const R = require('ramda')
+const h = require('virtual-dom/h')
+const diff = require('virtual-dom/diff')
+const patch = require('virtual-dom/patch')
+const createElement = require('virtual-dom/create-element')
 
-const createRow = R.curry(h)('tr', R.__, undefined);
-const createCell = R.curry(h)('td', R.__, R.__);
+const createRow = R.curry(h)('tr', R.__, undefined)
+const createCell = R.curry(h)('td', R.__, R.__)
 
 const createVirtualRoot = (rows, onclick) => h('div.center', [
   h('table', R.mapIndexed((row, rowIndex) => createRow(R.mapIndexed((cell, cellIndex) => createCell({
-    onclick: () => onclick(R.add(R.multiply(rowIndex, R.length(row)), cellIndex))
-  }, getCharacterFromModelCode(cell)), row)), rows))
-]);
+    onclick: () => onclick(R.add(R.multiply(rowIndex, R.length(row)), cellIndex)),
+  }, getCharacterFromModelCode(cell)), row)), rows)),
+])
 
-const getCharacterFromModelCode = (code) => R.cond(
+const getCharacterFromModelCode = code => R.cond(
   [R.eq(0), R.always('')],
   [R.eq(1), R.always('O')],
   [R.eq(2), R.always('X')]
-)(code);
+)(code)
 
-var virtualRoot = null;
-var domRoot = null;
+let virtualRoot = null
+let domRoot = null
 
 module.exports = (rows, onclick) => {
   R.ifElse(
     R.not,
     () => {
-      virtualRoot = createVirtualRoot(rows, onclick);
-      domRoot = createElement(virtualRoot);
-      document.getElementById('board_container').appendChild(domRoot);
+      virtualRoot = createVirtualRoot(rows, onclick)
+      domRoot = createElement(virtualRoot)
+      document.getElementById('board_container').appendChild(domRoot)
     },
     () => {
-      const newVirtualRoot = createVirtualRoot(rows, onclick);
-      domRoot = patch(domRoot, diff(virtualRoot, createVirtualRoot(rows, onclick)));
-      virtualRoot = newVirtualRoot;
+      const newVirtualRoot = createVirtualRoot(rows, onclick)
+      domRoot = patch(domRoot, diff(virtualRoot, createVirtualRoot(rows, onclick)))
+      virtualRoot = newVirtualRoot
     }
-  )(domRoot);
-};
+  )(domRoot)
+}
 
 },{"ramda":12,"virtual-dom/create-element":13,"virtual-dom/diff":14,"virtual-dom/h":15,"virtual-dom/patch":16}],4:[function(require,module,exports){
-const R = require('ramda');
-const h = require('virtual-dom/h');
-const createElement = require('virtual-dom/create-element');
+const h = require('virtual-dom/h')
+const createElement = require('virtual-dom/create-element')
 
-const renderMessage = (message) =>
+const renderMessage = message =>
   document.getElementById('message_container').appendChild(createElement(h('div.center', [
-    h('output', message)
-  ])));
+    h('output', message),
+  ])))
 
-const draw = () => renderMessage(`Draw`);
-const victory = (winner) => renderMessage(`Victory for ${winner}!`);
+const draw = () => renderMessage('Draw')
+const victory = winner => renderMessage(`Victory for ${winner}!`)
 
 module.exports = {
   draw,
-  victory
-};
+  victory,
+}
 
-},{"ramda":12,"virtual-dom/create-element":13,"virtual-dom/h":15}],5:[function(require,module,exports){
+},{"virtual-dom/create-element":13,"virtual-dom/h":15}],5:[function(require,module,exports){
 
 },{}],6:[function(require,module,exports){
 /*!

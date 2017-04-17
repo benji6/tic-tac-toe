@@ -5,7 +5,7 @@
   "main": "js/main.js",
   "scripts": {
     "start": "gulp",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -17,11 +17,10 @@
     "url": "https://github.com/benji6/tic-tac-toe/issues"
   },
   "homepage": "https://github.com/benji6/tic-tac-toe",
-  "jshintConfig": {
-    "esnext": "true"
-  },
   "devDependencies": {
     "browserify": "^9.0.3",
+    "eslint": "^3.19.0",
+    "eslint-config-benji6": "^1.2.0",
     "gulp": "^3.8.11",
     "gulp-util": "^3.0.4",
     "vinyl-source-stream": "^1.1.0",
