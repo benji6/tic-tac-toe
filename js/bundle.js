@@ -111,23 +111,15 @@ module.exports = (rows, onclick) => {
 }
 
 },{"ramda":11,"virtual-dom/create-element":12,"virtual-dom/diff":13,"virtual-dom/h":14,"virtual-dom/patch":15}],3:[function(require,module,exports){
-const h = require('virtual-dom/h')
-const createElement = require('virtual-dom/create-element')
-
-const renderMessage = message =>
-  document.getElementById('message_container').appendChild(createElement(h('div.center', [
-    h('output', message),
-  ])))
-
-const draw = () => renderMessage('Draw')
-const victory = winner => renderMessage(`Victory for ${winner}!`)
+const messsageEl = document.getElementById('message_container')
+const renderMessage = message => messsageEl.innerHTML = `<div class="center">${message}</div>`
 
 module.exports = {
-  draw,
-  victory,
+  draw: () => renderMessage('Draw'),
+  victory: winner => renderMessage(`Victory for ${winner}!`),
 }
 
-},{"virtual-dom/create-element":12,"virtual-dom/h":14}],4:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 
 },{}],5:[function(require,module,exports){
 /*!
